@@ -25,6 +25,6 @@ setup(
         'Environment :: Other Environment',
         'Programming Language :: Python',
         'Programming Language :: Python :: 2',
-        'Topic :: Software Development :: Testing',
+        'Topic :: Utilities',
     ],
 )
