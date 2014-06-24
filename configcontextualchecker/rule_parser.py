@@ -178,7 +178,7 @@ def _parse_allowed(allowed, type_):
         return allowed
 
     elif isinstance(allowed, str):
-        allowed = map(string.strip, allowed.split(','))
+        allowed = [s.strip() for s in allowed.split(',')]
 
     # always process a list
     if not isinstance(allowed, list):

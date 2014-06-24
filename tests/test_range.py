@@ -86,10 +86,10 @@ class TestRangeParser(unittest.TestCase):
             (0, False, None, False): {
                 -1: False,
                 0: True,
-                sys.maxint: True,
+                sys.maxsize: True,
             },
             (None, False, 2, False): {
-                -sys.maxint: True,
+                -sys.maxsize: True,
                 2: True,
                 3: False,
             },

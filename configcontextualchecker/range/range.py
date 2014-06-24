@@ -64,7 +64,7 @@ class Range(object):
         types_ = set((type(lower_value), type(upper_value)))
         try:
             # remove None to simplify further checking
-            types_.remove(types.NoneType)
+            types_.remove(type(None))
             has_None = True
         except KeyError:
             has_None = False
