@@ -12,7 +12,7 @@ setup(
     url='https://github.com/AntoineD/configcontextualchecker',
     download_url='https://pypi.python.org/pypi/configcontextualchecker',
     packages=['configcontextualchecker'],
-    install_requires=['networkx'],
+    install_requires=['networkx', 'pyparsing'],
     description='Contextual checking and default settings for config files',
     long_description=open('README.rst').read(),
     keywords='config contextual checker configobj',
@@ -28,6 +28,3 @@ setup(
         'Topic :: Software Development :: Testing',
     ],
 )
-
-
-
