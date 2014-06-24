@@ -21,8 +21,6 @@ setup(
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
         'Natural Language :: English',
-        'Environment :: Plugins',
-        'Environment :: Other Environment',
         'Programming Language :: Python',
         'Programming Language :: Python :: 2',
         'Topic :: Utilities',

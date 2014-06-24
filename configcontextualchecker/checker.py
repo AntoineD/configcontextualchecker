@@ -62,7 +62,9 @@ class ConfigContextualChecker(object):
         # create the dependency graph of the rules nodes
         self.graph = networkx.DiGraph()
         self.graph.add_nodes_from(nodes)
-        name_node = {node.name: node for node in nodes}
+        name_node = dict()
+        for node in nodes:
+            name_node[node.name] = node
         for node in nodes:
             for dep in node.dependencies:
                 self.graph.add_edge(name_node[dep], node)
