@@ -62,7 +62,7 @@ class TestRuleEnforcer(unittest.TestCase):
             'False': bool,
         }
 
-        for datum, expected in data.viewitems():
+        for datum, expected in data.items():
             self.assertEqual(_type_string(datum), expected)
 
     def test_string_to_type(self):

@@ -55,7 +55,7 @@ class ConfigContextualChecker(object):
     def __init__(self, rules_desc):
         # convert the rules descriptions into graph nodes
         nodes = list()
-        for name, raw_rule in rules_desc.viewitems():
+        for name, raw_rule in rules_desc.items():
             rule, deps = parse_rule(raw_rule)
             nodes += [GraphNode(name, rule, deps)]
 

@@ -66,7 +66,7 @@ def parse_rule(rule):
 
     # parse contextual rules
     deps = list()
-    for cond_exp, ctx_rule in ctx_rules.viewitems():
+    for cond_exp, ctx_rule in ctx_rules.items():
         deps += _parse_dependencies(cond_exp)
 
         # complete the context rule with inherited common rule
@@ -95,7 +95,7 @@ def _split_sub_sections(dict_):
     """
     items = dict()
     sub_sections = dict()
-    for key, value in dict_.viewitems():
+    for key, value in dict_.items():
         if isinstance(value, dict):
             sub_sections[key] = value
         else:

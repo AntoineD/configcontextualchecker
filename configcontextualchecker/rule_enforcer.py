@@ -26,7 +26,7 @@ def enforce_item_rule(item_path, rule, config):
     conditional_parser.set_buffer(config)
 
     # determine the rule definition to use
-    for cond_exp, ctx_rule in rule.viewitems():
+    for cond_exp, ctx_rule in rule.items():
         # check for a contextual rule
         if not isinstance(ctx_rule, dict):
             continue

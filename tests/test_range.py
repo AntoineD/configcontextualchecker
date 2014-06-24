@@ -49,8 +49,8 @@ class TestRangeParser(unittest.TestCase):
             },
         }
 
-        for bound, test_data in data.viewitems():
-            for value, expected in test_data.viewitems():
+        for bound, test_data in data.items():
+            for value, expected in test_data.items():
                 self.assertEqual(expected, bound.check(value))
 
     def test_Range(self):
@@ -95,9 +95,9 @@ class TestRangeParser(unittest.TestCase):
             },
         }
 
-        for args, test_data in data.viewitems():
+        for args, test_data in data.items():
             range_ = Range(*args)
-            for value, expected in test_data.viewitems():
+            for value, expected in test_data.items():
                 if expected:
                     self.assertIn(value, range_)
                 else:
@@ -120,7 +120,7 @@ class TestRangeParser(unittest.TestCase):
             (0, 0): ValueError,
             (1, 0): ValueError,
         }
-        for bounds, error in data.viewitems():
+        for bounds, error in data.items():
             with self.assertRaises(error):
                 Range._check_bounds_values(*bounds)
 
@@ -130,7 +130,7 @@ class TestRangeParser(unittest.TestCase):
             (None, 0): int,
             (0, None): int,
         }
-        for bounds, expected_type in data.viewitems():
+        for bounds, expected_type in data.items():
             type_ = Range(bounds[0], True, bounds[1], True).type
             self.assertEqual(expected_type, type_)
 
@@ -145,7 +145,7 @@ class TestRangeParser(unittest.TestCase):
             '[-inf,2.]': (None, False, 2, False),
         }
 
-        for string, expected in data.viewitems():
+        for string, expected in data.items():
             args = _get_range_args(string)
             # test bound values type explicitely as for python 0 == 0.
             self.assertEqual(type(args[0]), type(expected[0]))

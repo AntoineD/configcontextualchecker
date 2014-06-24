@@ -32,7 +32,7 @@ class TestExpressionParser(unittest.TestCase):
             '{a} in (x, y)': TypeError,
             }
 
-        for data, error in test_data.viewitems():
+        for data, error in test_data.items():
             self.assertRaises(error, parser.parse_string, data)
 
     def test_Contain(self):
@@ -132,7 +132,7 @@ class TestExpressionParser(unittest.TestCase):
             '({a} in (0, 1) or {b} > 1) and {c} != 2': False,
             }
 
-        for data, excepted in test_data.viewitems():
+        for data, excepted in test_data.items():
             self.checkEqual(data, excepted)
 
     def test_dict_path(self):
@@ -140,5 +140,5 @@ class TestExpressionParser(unittest.TestCase):
             '{/g/h} == 0': True,
             }
 
-        for data, excepted in test_data.viewitems():
+        for data, excepted in test_data.items():
             self.checkEqual(data, excepted)
