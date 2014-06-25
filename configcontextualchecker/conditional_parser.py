@@ -55,7 +55,7 @@ def parse_string(string, config=None):
         parsed = _parser.parseString(string)
     except ParseException as err:
         column = ' '*(err.column-1)
-        msg = '{}\n{}\n{}^'.format(err.msg, err.line, column)
+        msg = '{0}\n{1}\n{2}^'.format(err.msg, err.line, column)
         raise ParserError(msg)
     else:
         return parsed[0]

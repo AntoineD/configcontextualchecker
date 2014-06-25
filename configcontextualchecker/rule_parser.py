@@ -140,7 +140,7 @@ def _parse_rule_items(rule):
 
     # check there's no illegal keys
     if not set(rule).issubset(set(RULE_META_RULE)):
-        msg = 'item with key "{}" is not a valid rule item'.format(key)
+        msg = 'item with key "{0}" is not a valid rule item'.format(key)
         raise RuleError(msg)
 
     return new_rule
@@ -172,7 +172,7 @@ def _parse_allowed(allowed, type_):
     if isinstance(allowed, Range):
         # already a range
         if allowed.type != type_:
-            msg = 'range type is "{}" but it should be "{}"'.format(
+            msg = 'range type is "{0}" but it should be "{1}"'.format(
                 allowed.type, type_)
             raise TypeError(msg)
         return allowed
@@ -210,5 +210,5 @@ def _parse_dependencies(string):
     if parsed:
         return list(t[0] for t in parsed)
     else:
-        msg = 'no dependency found in section {}'.format(string)
+        msg = 'no dependency found in section {0}'.format(string)
         raise RuleError(msg)

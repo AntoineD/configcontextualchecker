@@ -82,7 +82,7 @@ def check_value(value, exists, type_, allowed=None, default=None):
 
         # check type
         if type(value) != type_ and _type_string(value) != type_:
-            msg = 'bad item type: expected {}, found {}'.format(
+            msg = 'bad item type: expected {0}, found {1}'.format(
                 type_, _type_string(value))
             raise TypeError(msg)
 
@@ -96,7 +96,7 @@ def check_value(value, exists, type_, allowed=None, default=None):
 
         # check allowed value
         if allowed is not None and value not in allowed:
-            msg = 'value is not allowed: must be in {}'.format(allowed)
+            msg = 'value is not allowed: must be in {0}'.format(allowed)
             raise ValueError(msg)
 
         return value

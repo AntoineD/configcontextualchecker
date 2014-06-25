@@ -85,7 +85,7 @@ class LowerBound(BoundBase):
             True: ']',
             False: '[',
         }
-        return '{}{}'.format(s[self._open], v)
+        return '{0}{1}'.format(s[self._open], v)
 
 
 class UpperBound(BoundBase):
@@ -104,4 +104,4 @@ class UpperBound(BoundBase):
             True: '[',
             False: ']',
         }
-        return '{}{}'.format(v, s[self._open])
+        return '{0}{1}'.format(v, s[self._open])

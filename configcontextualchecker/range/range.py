@@ -71,8 +71,8 @@ class Range(object):
 
         if tuple(types_) not in ((int,), (float,)):
             msg = 'incompatible types of the lower and upper bounds values: ' \
-                  'type(lower) = {} and type(upper) = {}'.format(lower_value,
-                                                                 upper_value)
+                  'type(lower) = {0} and type(upper) = {1}'.format(lower_value,
+                                                                   upper_value)
             raise TypeError(msg)
         elif has_None:
             # one value is None so no further checks
@@ -80,12 +80,13 @@ class Range(object):
 
         if lower_value == upper_value:
             msg = 'lower and upper bounds are equal: ' \
-                  'lower = upper = {}'.format(lower_value)
+                  'lower = upper = {0}'.format(lower_value)
             raise ValueError(msg)
 
         elif lower_value > upper_value:
             msg = 'lower bound is greater than upper bounds: ' \
-                  'lower = {} and upper = {}'.format(lower_value, upper_value)
+                  'lower = {0} and upper = {1}'.format(lower_value,
+                                                       upper_value)
             raise ValueError(msg)
 
     def __contains__(self, value):
@@ -104,7 +105,7 @@ class Range(object):
         return self.lower.check(value) and self.upper.check(value)
 
     def __repr__(self):
-        return '{}, {}'.format(self.lower, self.upper)
+        return '{0}, {1}'.format(self.lower, self.upper)
 
     def __eq__(self, other):
         # there is a one to one mapping from string representation to
