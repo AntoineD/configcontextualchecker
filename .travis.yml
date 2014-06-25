@@ -5,7 +5,7 @@ python:
   - "3.2"
   - "3.3"
   - "3.4"
-# command to install dependencies
+before_install:
+  - if [[ $TRAVIS_PYTHON_VERSION == '2.6' ]]; then pip install unittest2; fi
 install: "pip install ."
-# command to run tests
 script: nosetests
