@@ -19,9 +19,9 @@ class TestExpressionParser(unittest.TestCase):
     def setUp(self):
         parser.set_buffer(self.SECTION)
 
-    def checkEqual(self, data, excepted):
+    def checkEqual(self, data, expected):
         result = parser.parse_string(data)
-        self.assertEqual(result, excepted)
+        self.assertEqual(result, expected)
 
     def test_ContainRaises(self):
         test_data = {
@@ -46,8 +46,8 @@ class TestExpressionParser(unittest.TestCase):
             '{d} not in (x, e)': False,
             }
 
-        for data, excepted in test_data.items():
-            self.checkEqual(data, excepted)
+        for data, expected in test_data.items():
+            self.checkEqual(data, expected)
 
     def test_ComparisonRaises(self):
         # bad type
@@ -78,8 +78,8 @@ class TestExpressionParser(unittest.TestCase):
             )
 
         for data in test_data:
-            excepted = eval(data.format(**self.SECTION))
-            self.checkEqual(data, excepted)
+            expected = eval(data.format(**self.SECTION))
+            self.checkEqual(data, expected)
 
         # strings has to be handled manually
         self.checkEqual('{d} == e', True)
@@ -112,8 +112,8 @@ class TestExpressionParser(unittest.TestCase):
             )
 
         for data in test_data:
-            excepted = eval(data)
-            self.checkEqual(data, excepted)
+            expected = eval(data)
+            self.checkEqual(data, expected)
 
         # testing with items
         test_data2 = list()
@@ -123,8 +123,8 @@ class TestExpressionParser(unittest.TestCase):
             test_data2 += [data]
 
         for data in test_data2:
-            excepted = eval(data.format(**self.SECTION))
-            self.checkEqual(data, excepted)
+            expected = eval(data.format(**self.SECTION))
+            self.checkEqual(data, expected)
 
     def test_compound(self):
         test_data = {
@@ -132,13 +132,13 @@ class TestExpressionParser(unittest.TestCase):
             '({a} in (0, 1) or {b} > 1) and {c} != 2': False,
             }
 
-        for data, excepted in test_data.items():
-            self.checkEqual(data, excepted)
+        for data, expected in test_data.items():
+            self.checkEqual(data, expected)
 
     def test_dict_path(self):
         test_data = {
             '{/g/h} == 0': True,
             }
 
-        for data, excepted in test_data.items():
-            self.checkEqual(data, excepted)
+        for data, expected in test_data.items():
+            self.checkEqual(data, expected)

@@ -121,7 +121,7 @@ def _type_variables(sequence, type_=str):
     sequence : list or tuple
         sequence of objects
     type_ : int or float or str, optional
-        excepted type, optional
+        expected type, optional
 
     Returns
     -------
