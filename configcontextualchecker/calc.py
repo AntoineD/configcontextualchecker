@@ -2,30 +2,6 @@ from ply import lex, yacc
 
 
 class Parser(object):
-    """
-    Base class for a lexer/parser that has the rules defined as methods
-    """
-
-    tokens = ()
-    precedence = ()
-
-    def __init__(self, **kw):
-        self.names = {}
-        lex.lex(module=self)
-        yacc.yacc(module=self)
-
-    def run(self):
-        while True:
-            try:
-                s = raw_input('calc > ')
-            except EOFError:
-                break
-            if not s:
-                continue
-            yacc.parse(s)
-
-
-class Calc(Parser):
 
     tokens = (
         'BOOL',
@@ -46,6 +22,21 @@ class Calc(Parser):
     # t_NAME = r'[a-zA-Z_][a-zA-Z0-9_]*'
 
     t_ignore = " \t"
+
+    def __init__(self):
+        self.names = {}
+        lex.lex(module=self)
+        yacc.yacc(module=self)
+
+    def run(self):
+        while True:
+            try:
+                s = raw_input('calc > ')
+            except EOFError:
+                break
+            if not s:
+                continue
+            yacc.parse(s)
 
     def t_BOOL(self, t):
         r'True|False'
@@ -123,5 +114,5 @@ class Calc(Parser):
             print("Syntax error at EOF")
 
 if __name__ == '__main__':
-    calc = Calc()
+    calc = Parser()
     calc.run()
