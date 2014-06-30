@@ -28,6 +28,9 @@ class Parser(object):
         lex.lex(module=self)
         yacc.yacc(module=self)
 
+    def parse_string(self, s):
+        yacc.parse(s)
+
     def run(self):
         while True:
             try:
