@@ -117,16 +117,16 @@ class TestExpressionParser(unittest.TestCase):
             self.checkEqual(data, expected)
 
         # testing with items
-        # test_data2 = list()
-        # for data in test_data:
-        #     data.replace('True', '{t}')
-        #     data.replace('False', '{f}')
-        #     test_data2 += [data]
-        #
-        # for data in test_data2:
-        #     expected = eval(data.format(**self.SECTION))
-        #     self.checkEqual(data, expected)
-        #
+        test_data2 = list()
+        for data in test_data:
+            data.replace('True', '{t}')
+            data.replace('False', '{f}')
+            test_data2 += [data]
+
+        for data in test_data2:
+            expected = eval(data.format(**self.SECTION))
+            self.checkEqual(data, expected)
+
     def test_compound(self):
         test_data = {
             '{a} in (0, 1) and {b} == 1': True,

@@ -1,5 +1,7 @@
 from ply import lex, yacc
 
+from .dict_path import get_from_path
+
 
 class ParserError(Exception):
     pass
@@ -9,6 +11,7 @@ class Parser(object):
 
     tokens = (
         'BOOL',
+        'ITEM',
         'NOT',
         'AND',
         'OR',
@@ -27,29 +30,14 @@ class Parser(object):
 
     t_ignore = " \t"
 
-    def __init__(self, config):
-        self.config = config
-        self.names = {}
-        lex.lex(module=self)
-        yacc.yacc(module=self)
-
-    def parse_string(self, s):
-        return yacc.parse(s)
-
-    def run(self):
-        while True:
-            try:
-                s = raw_input('calc > ')
-            except EOFError:
-                break
-            if not s:
-                continue
-            print self.parse_string(s)
-
     def t_BOOL(self, t):
         r'True|False'
         t.value = eval(t.value)
         return t
+
+    def t_ITEM(self, t):
+        r'{.*}'
+        return get_from_path(self.config, t[1])
 
     # def t_NUMBER(self, t):
     #     r'\d+'
@@ -98,6 +86,10 @@ class Parser(object):
         'expression : LPAREN expression RPAREN'
         p[0] = p[2]
 
+    def p_expression_item(self, p):
+        'expression : ITEM'
+        p[0] = p[1]
+
     def p_expression_bool(self, p):
         'expression : BOOL'
         p[0] = p[1]
@@ -115,6 +107,26 @@ class Parser(object):
             print("Syntax error at '%s'" % p.value)
         else:
             print("Syntax error at EOF")
+
+    def __init__(self, config):
+        self.config = config
+        self.names = {}
+        lex.lex(module=self)
+        yacc.yacc(module=self)
+
+    def parse_string(self, s):
+        return yacc.parse(s)
+
+    def run(self):
+        while True:
+            try:
+                s = raw_input('calc > ')
+            except EOFError:
+                break
+            if not s:
+                continue
+            print self.parse_string(s)
+
 
 if __name__ == '__main__':
     calc = Parser(None)
