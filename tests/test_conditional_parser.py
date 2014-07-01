@@ -1,5 +1,5 @@
 import unittest
-from configcontextualchecker import conditional_parser as parser
+from configcontextualchecker.conditional_parser import Parser, ParserError
 
 
 class TestExpressionParser(unittest.TestCase):
@@ -17,17 +17,18 @@ class TestExpressionParser(unittest.TestCase):
         }
 
     def setUp(self):
-        parser.set_buffer(self.SECTION)
+        self.parser = Parser(self.SECTION)
+        # parser.set_buffer(self.SECTION)
 
     def checkEqual(self, data, expected):
-        result = parser.parse_string(data)
+        result = self.parser.parse_string(data)
         self.assertEqual(result, expected)
 
     def test_ContainRaises(self):
         test_data = {
             # no list
-            '{a} in 0': parser.ParserError,
-            '{a} not in 0': parser.ParserError,
+            '{a} in 0': ParserError,
+            '{a} not in 0': ParserError,
             # bad type
             '{a} in (x, y)': TypeError,
             }
@@ -116,16 +117,16 @@ class TestExpressionParser(unittest.TestCase):
             self.checkEqual(data, expected)
 
         # testing with items
-        test_data2 = list()
-        for data in test_data:
-            data.replace('True', '{t}')
-            data.replace('False', '{f}')
-            test_data2 += [data]
-
-        for data in test_data2:
-            expected = eval(data.format(**self.SECTION))
-            self.checkEqual(data, expected)
-
+        # test_data2 = list()
+        # for data in test_data:
+        #     data.replace('True', '{t}')
+        #     data.replace('False', '{f}')
+        #     test_data2 += [data]
+        #
+        # for data in test_data2:
+        #     expected = eval(data.format(**self.SECTION))
+        #     self.checkEqual(data, expected)
+        #
     def test_compound(self):
         test_data = {
             '{a} in (0, 1) and {b} == 1': True,

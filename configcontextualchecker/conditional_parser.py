@@ -1,209 +1,121 @@
-"""This module is used for parsing conditional expressions."""
-
-
-from pyparsing import infixNotation, opAssoc, QuotedString, \
-    oneOf, Literal, Suppress, ParseException, \
-    Regex, quotedString, removeQuotes, delimitedList, Word, \
-    alphanums
-
-from .dict_path import get_from_path
+from ply import lex, yacc
 
 
 class ParserError(Exception):
     pass
 
 
-# module global variable that holds the dict config
-_config = None
+class Parser(object):
 
+    tokens = (
+        'BOOL',
+        'NOT',
+        'AND',
+        'OR',
+        'LPAREN',
+        'RPAREN',
+        # 'NAME', 'NUMBER',
+    )
 
-def set_buffer(config):
-    """Set the module config.
+    # Tokens
+    t_NOT = r'not'
+    t_AND = r'and'
+    t_OR = r'or'
+    t_LPAREN = r'\('
+    t_RPAREN = r'\)'
+    # t_NAME = r'[a-zA-Z_][a-zA-Z0-9_]*'
 
-    Parameters
-    ----------
-    config : dict
-        config object used to get values bound to dependencies
-    """
-    global _config
-    _config = config
+    t_ignore = " \t"
 
+    def __init__(self, config):
+        self.config = config
+        self.names = {}
+        lex.lex(module=self)
+        yacc.yacc(module=self)
 
-def parse_string(string, config=None):
-    """Parse a string.
+    def parse_string(self, s):
+        return yacc.parse(s)
 
-    Parameters
-    ----------
-    string : str
-        a string to parse
-    config : dict, optional
-        config object
+    def run(self):
+        while True:
+            try:
+                s = raw_input('calc > ')
+            except EOFError:
+                break
+            if not s:
+                continue
+            print self.parse_string(s)
 
-    Returns
-    -------
-    bool
-        truth value of the conditional expression
+    def t_BOOL(self, t):
+        r'True|False'
+        t.value = eval(t.value)
+        return t
 
-    Raises
-    ------
-    ParserError
-       if there is a parsing error
-    """
-    global _config
-    _config = config or _config
-    try:
-        parsed = _parser.parseString(string)
-    except ParseException as err:
-        column = ' '*(err.column-1)
-        msg = '{0}\n{1}\n{2}^'.format(err.msg, err.line, column)
-        raise ParserError(msg)
-    else:
-        return parsed[0]
+    # def t_NUMBER(self, t):
+    #     r'\d+'
+    #     try:
+    #         t.value = int(t.value)
+    #     except ValueError:
+    #         print("Integer value too large %s" % t.value)
+    #         t.value = 0
+    #     # print "parsed number %s" % repr(t.value)
+    #     return t
 
+    def t_error(self, t):
+        print("Illegal character '%s'" % t.value[0])
+        t.lexer.skip(1)
 
-# @traceParseAction
-def _action_item(tokens):
-    """Return the value bound to the key in config."""
-    return get_from_path(_config, tokens[0])
+    # Parsing rules
 
+    precedence = (
+        ('left', 'OR'),
+        ('left', 'AND'),
+        ('right', 'NOT'),
+        # ('left', 'PLUS', 'MINUS'),
+        # ('left', 'TIMES', 'DIVIDE'),
+        # ('right', 'UMINUS'),
+    )
 
-# @traceParseAction
-def _action_contain(tokens):
-    """Return whether an item is contained in a list."""
-    item = tokens[0]
-    container = _type_variables(tokens[2:], type_=type(item))
-    if tokens[1] == 'in':
-        return item in container
-    elif tokens[1] == 'not in':
-        return item not in container
+    # def p_statement_assign(self, p):
+    #     'statement : NAME EQUALS expression'
+    #     self.names[p[1]] = p[3]
 
+    def p_expression_binop(self, p):
+        """
+        expression : expression OR expression
+                  | expression AND expression
+        """
+        if p[2] == 'or':
+            p[0] = p[1] or p[3]
+        elif p[2] == 'and':
+            p[0] = p[1] and p[3]
 
-# @traceParseAction
-def _action_comparison(tokens):
-    """Return the result of a comparison."""
-    operators = tokens[1::2]
-    values = _type_variables(tokens[::2])
-    val1 = values[0]
-    for op, val in zip(operators, values[1:]):
-        val2 = val
-        if not COMPARISON_OPERATORS[op](val1, val2):
-            return False
-        val1 = val2
+    def p_expression_not(self, p):
+        'expression : NOT expression %prec NOT'
+        p[0] = not p[2]
 
-    return True
+    def p_expression_group(self, p):
+        'expression : LPAREN expression RPAREN'
+        p[0] = p[2]
 
+    def p_expression_bool(self, p):
+        'expression : BOOL'
+        p[0] = p[1]
 
-def _action_and(tokens):
-    """Return whether and condition is true."""
-    return all(tokens[0][0::2])
+    # def p_expression_name(self, p):
+    #     'expression : NAME'
+    #     try:
+    #         p[0] = self.names[p[1]]
+    #     except LookupError:
+    #         print("Undefined name '%s'" % p[1])
+    #         p[0] = 0
+    #
+    def p_error(self, p):
+        if p:
+            print("Syntax error at '%s'" % p.value)
+        else:
+            print("Syntax error at EOF")
 
-
-def _action_or(tokens):
-    """Return whether or condition is true."""
-    return any(tokens[0][0::2])
-
-
-def _action_not(tokens):
-    """Return whether not condition is true."""
-    return not tokens[0][1]
-
-
-def _action_variable(tokens):
-    """Return the evaluation of a variable passed as a string."""
-    return eval(tokens[0])
-
-
-def _type_variables(sequence, type_=str):
-    """Return consistently typed objects.
-
-    Parameters
-    ----------
-    sequence : list or tuple
-        sequence of objects
-    type_ : int or float or str, optional
-        expected type, optional
-
-    Returns
-    -------
-    list of type
-        typed sequence
-
-    Raises
-    ------
-    TypeError
-        if the type is non unique.
-    """
-    # look for items that are not strings, if any
-    types = map(type, sequence) + [type_]
-    nonstr = [t for t in types if t != str]
-    # determine if those non string objects have a consistent type
-    unique_type = tuple(set(nonstr))
-    if len(unique_type) > 1:
-        # TODO: better msg
-        raise TypeError('non unique type')
-    elif len(unique_type) == 0:
-        type_ = str
-    else:
-        type_ = unique_type[0]
-    try:
-        return map(type_, sequence)
-    except ValueError:
-        raise TypeError('non consistent type')
-
-# define the parser elements
-BOOL = oneOf('True False')
-BOOL.setParseAction(_action_variable)
-
-INTEGER = Regex(r'[+-]?\d+')
-FLOAT = Regex(r'\d+\.\d*([eE]\d+)?')
-
-STRING = quotedString
-STRING.setParseAction(removeQuotes)
-
-ITEM = QuotedString(quoteChar='{', endQuoteChar='}')
-ITEM.setParseAction(_action_item)
-
-# float must be first so to catch the decimal separator
-OPERAND = FLOAT | INTEGER | STRING | Word(alphanums + '=_-')
-LIST = Suppress('(') + delimitedList(OPERAND) + Suppress(')')
-TERM = OPERAND | ITEM
-
-CONTAIN_EXPR = ITEM + (Literal('in') | Literal('not in')) + LIST
-CONTAIN_EXPR.setParseAction(_action_contain)
-
-COMPARISON_EXPR = TERM + (oneOf('< <= > >= != ==') + TERM)*(1, 2)
-COMPARISON_EXPR.setParseAction(_action_comparison)
-
-# give the parser elements names for easier debugging
-# INTEGER.setName('integer')
-# FLOAT.setName('float')
-# STRING.setName('string')
-# OPERAND.setName('operand')
-# LIST.setName('list')
-# ITEM.setName('item')
-# CONTAIN_EXPR.setName('contain')
-# COMPARISON_EXPR.setName('comparison')
-
-# CONTAIN_EXPR.setDebug()
-# COMPARISON_EXPR.setDebug()
-
-COMPARISON_OPERATORS = {
-    '<': lambda a, b: a < b,
-    '>': lambda a, b: a > b,
-    '<=': lambda a, b: a <= b,
-    '>=': lambda a, b: a >= b,
-    '!=': lambda a, b: a != b,
-    '==': lambda a, b: a == b,
-    }
-
-# assemble the parser
-_condition_operand = CONTAIN_EXPR | COMPARISON_EXPR | BOOL
-_parser = infixNotation(
-    _condition_operand,
-    [
-        ('not', 1, opAssoc.RIGHT, _action_not),
-        ('and', 2, opAssoc.LEFT, _action_and),
-        ('or', 2, opAssoc.LEFT, _action_or),
-    ]
-)
-# _parser.setDebug()
+if __name__ == '__main__':
+    calc = Parser(None)
+    calc.run()
