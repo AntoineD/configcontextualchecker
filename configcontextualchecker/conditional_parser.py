@@ -12,11 +12,18 @@ class Parser(object):
     tokens = (
         'BOOL',
         'ITEM',
+        'INTEGER',
         'NOT',
         'AND',
         'OR',
         'LPAREN',
         'RPAREN',
+        'EQ',
+        'NE',
+        'LT',
+        'GT',
+        'LE',
+        'GE',
         # 'NAME', 'NUMBER',
     )
 
@@ -26,11 +33,22 @@ class Parser(object):
     t_OR = r'or'
     t_LPAREN = r'\('
     t_RPAREN = r'\)'
+    t_EQ = r'=='
+    t_NE = r'!='
+    t_LT = r'<'
+    t_GT = r'>'
+    t_LE = r'<='
+    t_GE = r'>='
+
     # t_NAME = r'[a-zA-Z_][a-zA-Z0-9_]*'
 
     t_ignore = " \t"
 
-    def t_BOOL(self, t):
+    @staticmethod
+    def t_INTEGER(t):
+        r'[+-]?\d+'
+        t.value = eval(t.value)
+        return t
 
     @staticmethod
     def t_BOOL(t):
@@ -64,25 +82,7 @@ class Parser(object):
         ('left', 'OR'),
         ('left', 'AND'),
         ('right', 'NOT'),
-        # ('left', 'PLUS', 'MINUS'),
-        # ('left', 'TIMES', 'DIVIDE'),
-        # ('right', 'UMINUS'),
     )
-
-    # def p_statement_assign(self, p):
-    #     'statement : NAME EQUALS expression'
-    #     self.names[p[1]] = p[3]
-
-    @staticmethod
-    def p_expression_binop(p):
-        """
-        expression : expression OR expression
-                   | expression AND expression
-        """
-        if p[2] == 'or':
-            p[0] = p[1] or p[3]
-        elif p[2] == 'and':
-            p[0] = p[1] and p[3]
 
     @staticmethod
     def p_expression_not(p):
@@ -103,15 +103,32 @@ class Parser(object):
         """
         p[0] = p[1]
 
+    BINARY_OPERATORS = {
+        'or': lambda a, b: a or b,
+        'and': lambda a, b: a and b,
+        '<': lambda a, b: a < b,
+        '>': lambda a, b: a > b,
+        '<=': lambda a, b: a <= b,
+        '>=': lambda a, b: a >= b,
+        '!=': lambda a, b: a != b,
+        '==': lambda a, b: a == b,
+    }
 
-    # def p_expression_name(self, p):
-    #     'expression : NAME'
-    #     try:
-    #         p[0] = self.names[p[1]]
-    #     except LookupError:
-    #         print("Undefined name '%s'" % p[1])
-    #         p[0] = 0
-    #
+    @classmethod
+    def p_expression_binary_operator(cls, p):
+        """
+        expression : expression OR expression
+                   | expression AND expression
+                   | expression EQ expression
+                   | expression NE expression
+                   | expression LT expression
+                   | expression GT expression
+                   | expression LE expression
+                   | expression GE expression
+        """
+        # import pudb; pudb.set_trace()
+        p[0] = cls.BINARY_OPERATORS[p[2]](p[1], p[3])
+
     def p_error(self, p):
         if p:
             print("Syntax error at '%s'" % p.value)
