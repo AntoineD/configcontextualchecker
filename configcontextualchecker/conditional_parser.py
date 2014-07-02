@@ -31,13 +31,17 @@ class Parser(object):
     t_ignore = " \t"
 
     def t_BOOL(self, t):
+
+    @staticmethod
+    def t_BOOL(t):
         r'True|False'
         t.value = eval(t.value)
         return t
 
     def t_ITEM(self, t):
         r'{.*}'
-        return get_from_path(self.config, t[1])
+        t.value = get_from_path(self.config, t.value.strip('{}'))
+        return t
 
     # def t_NUMBER(self, t):
     #     r'\d+'
@@ -49,7 +53,8 @@ class Parser(object):
     #     # print "parsed number %s" % repr(t.value)
     #     return t
 
-    def t_error(self, t):
+    @staticmethod
+    def t_error(t):
         print("Illegal character '%s'" % t.value[0])
         t.lexer.skip(1)
 
@@ -68,31 +73,36 @@ class Parser(object):
     #     'statement : NAME EQUALS expression'
     #     self.names[p[1]] = p[3]
 
-    def p_expression_binop(self, p):
+    @staticmethod
+    def p_expression_binop(p):
         """
         expression : expression OR expression
-                  | expression AND expression
+                   | expression AND expression
         """
         if p[2] == 'or':
             p[0] = p[1] or p[3]
         elif p[2] == 'and':
             p[0] = p[1] and p[3]
 
-    def p_expression_not(self, p):
+    @staticmethod
+    def p_expression_not(p):
         'expression : NOT expression %prec NOT'
         p[0] = not p[2]
 
-    def p_expression_group(self, p):
+    @staticmethod
+    def p_expression_paren(p):
         'expression : LPAREN expression RPAREN'
         p[0] = p[2]
 
-    def p_expression_item(self, p):
-        'expression : ITEM'
+    @staticmethod
+    def p_expression_term(p):
+        """
+        expression : INTEGER
+                   | ITEM
+                   | BOOL
+        """
         p[0] = p[1]
 
-    def p_expression_bool(self, p):
-        'expression : BOOL'
-        p[0] = p[1]
 
     # def p_expression_name(self, p):
     #     'expression : NAME'

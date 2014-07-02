@@ -13,12 +13,11 @@ class TestExpressionParser(unittest.TestCase):
         'z': 'x y',
         't': True,
         'f': False,
-        'g': {'h': 0},
+        'g': {'h': True},
         }
 
     def setUp(self):
         self.parser = Parser(self.SECTION)
-        # parser.set_buffer(self.SECTION)
 
     def checkEqual(self, data, expected):
         result = self.parser.parse_string(data)
@@ -138,7 +137,7 @@ class TestExpressionParser(unittest.TestCase):
 
     def test_dict_path(self):
         test_data = {
-            '{/g/h} == 0': True,
+            '{/g/h}': True,
             }
 
         for data, expected in test_data.items():
