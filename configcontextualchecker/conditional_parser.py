@@ -79,8 +79,9 @@ class Parser(object):
     # Parsing rules
 
     precedence = (
-        ('left', 'OR'),
-        ('left', 'AND'),
+        ('left', 'OR', 'AND'),
+        ('left', 'EQ', 'NE'),
+        ('left', 'GE', 'GT', 'LE', 'LT'),
         ('right', 'NOT'),
     )
 
@@ -115,16 +116,22 @@ class Parser(object):
     }
 
     @classmethod
+    def p_expression_binop_bool(cls, p):
+        """
+        expression : expression OR bool
+                   | expression AND bool
+                   | bool
+        """
+        # import pudb; pudb.set_trace()
+        p[0] = cls.BINARY_OPERATORS[p[2]](p[1], p[3])
+
+    @classmethod
     def p_expression_binary_operator(cls, p):
         """
-        expression : expression OR expression
-                   | expression AND expression
-                   | expression EQ expression
-                   | expression NE expression
-                   | expression LT expression
-                   | expression GT expression
-                   | expression LE expression
-                   | expression GE expression
+        expression : expression LT number
+                   | expression GT number
+                   | expression LE number
+                   | expression GE number
         """
         # import pudb; pudb.set_trace()
         p[0] = cls.BINARY_OPERATORS[p[2]](p[1], p[3])
