@@ -11,8 +11,8 @@ class Parser(object):
 
     tokens = (
         'BOOL',
-        'ITEM',
         'INTEGER',
+        'ITEM',
         'NOT',
         'AND',
         'OR',
@@ -24,6 +24,7 @@ class Parser(object):
         'GT',
         'LE',
         'GE',
+        'STRING',
         # 'NAME', 'NUMBER',
     )
 
@@ -40,9 +41,13 @@ class Parser(object):
     t_LE = r'<='
     t_GE = r'>='
 
-    # t_NAME = r'[a-zA-Z_][a-zA-Z0-9_]*'
-
     t_ignore = " \t"
+
+    @staticmethod
+    def t_STRING(t):
+        r'\"([^\\"]|(\\.))*\"'
+        t.value = t.value.strip('"')
+        return t
 
     @staticmethod
     def t_INTEGER(t):
@@ -57,8 +62,17 @@ class Parser(object):
         return t
 
     def t_ITEM(self, t):
-        r'{.*}'
+        r'{.+?}'
+        type_token = {
+            int: 'INTEGER',
+            float: 'FLOAT',
+            str: 'STRING',
+            bool: 'BOOL',
+        }
+        # import pudb; pudb.set_trace()
+        # TODO: check existence or error out
         t.value = get_from_path(self.config, t.value.strip('{}'))
+        t.type = type_token[type(t.value)]
         return t
 
     # def t_NUMBER(self, t):
@@ -79,29 +93,19 @@ class Parser(object):
     # Parsing rules
 
     precedence = (
-        ('left', 'OR', 'AND'),
         ('left', 'EQ', 'NE'),
         ('left', 'GE', 'GT', 'LE', 'LT'),
+        ('left', 'OR'),
+        ('left', 'AND'),
         ('right', 'NOT'),
     )
 
     @staticmethod
-    def p_expression_not(p):
-        'expression : NOT expression %prec NOT'
-        p[0] = not p[2]
-
-    @staticmethod
-    def p_expression_paren(p):
-        'expression : LPAREN expression RPAREN'
-        p[0] = p[2]
-
-    @staticmethod
-    def p_expression_term(p):
+    def p_bool(p):
         """
-        expression : INTEGER
-                   | ITEM
-                   | BOOL
+        bool : BOOL
         """
+        # belong
         p[0] = p[1]
 
     BINARY_OPERATORS = {
@@ -115,26 +119,52 @@ class Parser(object):
         '==': lambda a, b: a == b,
     }
 
-    @classmethod
-    def p_expression_binop_bool(cls, p):
-        """
-        expression : expression OR bool
-                   | expression AND bool
-                   | bool
-        """
-        # import pudb; pudb.set_trace()
-        p[0] = cls.BINARY_OPERATORS[p[2]](p[1], p[3])
+    # @classmethod
+    # def _binary_operator(cls, p):
+    #     p[0] = cls.BINARY_OPERATORS[p[2]](p[1], p[3])
+    #
+    # @classmethod
+    # def p_bool_binop(cls, p):
+    #     """
+    #     bool : bool OR bool
+    #          | bool AND bool
+    #     """
+    #     cls._binary_operator(p)
+    #
+    @staticmethod
+    def p_not(p):
+        'bool : NOT bool'
+        p[0] = not p[2]
 
     @classmethod
-    def p_expression_binary_operator(cls, p):
+    def p_binop(cls, p):
         """
-        expression : expression LT number
-                   | expression GT number
-                   | expression LE number
-                   | expression GE number
+        bool : number LT number
+             | number GT number
+             | number LE number
+             | number GE number
+             | number EQ number
+             | number NE number
+             | STRING EQ STRING
+             | STRING NE STRING
+             | bool OR bool
+             | bool AND bool
         """
         # import pudb; pudb.set_trace()
+        # cls._binary_operator(p)
         p[0] = cls.BINARY_OPERATORS[p[2]](p[1], p[3])
+
+    @staticmethod
+    def p_paren(p):
+        'bool : LPAREN bool RPAREN'
+        p[0] = p[2]
+
+    @staticmethod
+    def p_number(p):
+        """
+        number : INTEGER
+        """
+        p[0] = p[1]
 
     def p_error(self, p):
         if p:
@@ -145,6 +175,8 @@ class Parser(object):
     def __init__(self, config):
         self.config = config
         self.names = {}
+        # lex.lex(module=self, debug=1)
+        # yacc.yacc(module=self, debug=1)
         lex.lex(module=self)
         yacc.yacc(module=self)
 

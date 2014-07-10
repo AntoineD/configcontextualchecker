@@ -52,26 +52,26 @@ class TestExpressionParser(unittest.TestCase):
     def test_ComparisonRaises(self):
         # bad type
         test_data = (
-            '{a} < a',
+            '{a} < "a"',
             )
 
         for data in test_data:
-            self.assertRaises(TypeError, parser.parse_string, data)
+            self.assertRaises(TypeError, self.parser.parse_string, data)
 
     def test_Comparison(self):
         test_data = (
-            # '{a} < 1',
-            # '{a} <= 1',
-            # '{a} > 1',
-            # '{a} >= 1',
-            # '{a} == 1',
-            # '{a} != 1',
-            # '{b} < 1',
-            # '{b} <= 1',
-            # '{b} > 1',
-            # '{b} >= 1',
-            # '{b} == 1',
-            # '{b} != 1',
+            '{a} < 1',
+            '{a} <= 1',
+            '{a} > 1',
+            '{a} >= 1',
+            '{a} == 1',
+            '{a} != 1',
+            '{b} < 1',
+            '{b} <= 1',
+            '{b} > 1',
+            '{b} >= 1',
+            '{b} == 1',
+            '{b} != 1',
             '1 < {a} and {a} < 1',
             '1 < {b} and {b} < 1',
             '{a} < {b} and {b} < {c}',
@@ -82,11 +82,11 @@ class TestExpressionParser(unittest.TestCase):
             self.checkEqual(data, expected)
 
         # strings has to be handled manually
-        # self.checkEqual('{d} == e', True)
-        # self.checkEqual('{z} == "x y"', True)
+        self.checkEqual('{d} == "e"', True)
+        self.checkEqual('{z} == "x y"', True)
 
         # non existing item always make the condition false
-        self.checkEqual('{z} == 1', False)
+        # self.checkEqual('{z} == 1', False)
 
     def test_Condition(self):
         test_data = (
