@@ -26,7 +26,8 @@ class Parser(object):
         'LE',
         'GE',
         'STRING',
-        # 'NAME', 'NUMBER',
+        'COMMA',
+        'IN',
     )
 
     # Tokens
@@ -41,8 +42,16 @@ class Parser(object):
     t_GT = r'>'
     t_LE = r'<='
     t_GE = r'>='
+    t_COMMA = r','
+    t_IN = r'in'
 
     t_ignore = " \t"
+
+    @staticmethod
+    def t_LIST(t):
+        r'\(\s*(\d+)\s*)(?:,\s*(\d+)\s*)+\)'
+        t.value = t.value.strip('"')
+        return t
 
     @staticmethod
     def t_STRING(t):
@@ -82,16 +91,6 @@ class Parser(object):
         t.type = type_token[type(t.value)]
         return t
 
-    # def t_NUMBER(self, t):
-    #     r'\d+'
-    #     try:
-    #         t.value = int(t.value)
-    #     except ValueError:
-    #         print("Integer value too large %s" % t.value)
-    #         t.value = 0
-    #     # print "parsed number %s" % repr(t.value)
-    #     return t
-
     @staticmethod
     def t_error(t):
         print("Illegal character '%s'" % t.value[0])
@@ -107,14 +106,13 @@ class Parser(object):
         ('right', 'NOT'),
     )
 
-    @staticmethod
-    def p_bool(p):
-        """
-        bool : BOOL
-        """
-        # belong
-        p[0] = p[1]
-
+    # @staticmethod
+    # def p_bool(p):
+    #     """
+    #     bool : BOOL
+    #     """
+    #     p[0] = p[1]
+    #
     BINARY_OPERATORS = {
         'or': lambda a, b: a or b,
         'and': lambda a, b: a and b,
@@ -146,21 +144,46 @@ class Parser(object):
              | bool AND bool
         """
         # import pudb; pudb.set_trace()
-        # cls._binary_operator(p)
+        # check type consistency for numbers
         p[0] = cls.BINARY_OPERATORS[p[2]](p[1], p[3])
 
     @staticmethod
     def p_paren(p):
-        'bool : LPAREN bool RPAREN'
+        """
+        bool : LPAREN bool RPAREN
+        container : LPAREN list RPAREN
+        """
         p[0] = p[2]
 
     @staticmethod
-    def p_number(p):
+    def p_self(p):
         """
+        bool : BOOL
         number : INTEGER
                | FLOAT
+        item : number
+             | STRING
+        listitem : item
+                 | list
         """
         p[0] = p[1]
+
+    @staticmethod
+    def p_list(p):
+        """
+        list : listitem COMMA
+        """
+        if isinstance(p[1], list):
+            p[0] += p[1]
+        else:
+            p[0] = [p[1]]
+
+    @staticmethod
+    def p_membership(p):
+        """
+        bool : item IN container
+        """
+        p[0] = p[1] in p[3]
 
     def p_error(self, p):
         if p:
