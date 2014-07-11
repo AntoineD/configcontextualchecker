@@ -12,6 +12,7 @@ class Parser(object):
     tokens = (
         'BOOL',
         'INTEGER',
+        'FLOAT',
         'ITEM',
         'NOT',
         'AND',
@@ -52,6 +53,12 @@ class Parser(object):
     @staticmethod
     def t_INTEGER(t):
         r'[+-]?\d+'
+        t.value = eval(t.value)
+        return t
+
+    @staticmethod
+    def t_FLOAT(t):
+        r'\d+\.\d*([eE]\d+)?'
         t.value = eval(t.value)
         return t
 
@@ -119,18 +126,6 @@ class Parser(object):
         '==': lambda a, b: a == b,
     }
 
-    # @classmethod
-    # def _binary_operator(cls, p):
-    #     p[0] = cls.BINARY_OPERATORS[p[2]](p[1], p[3])
-    #
-    # @classmethod
-    # def p_bool_binop(cls, p):
-    #     """
-    #     bool : bool OR bool
-    #          | bool AND bool
-    #     """
-    #     cls._binary_operator(p)
-    #
     @staticmethod
     def p_not(p):
         'bool : NOT bool'
@@ -163,6 +158,7 @@ class Parser(object):
     def p_number(p):
         """
         number : INTEGER
+               | FLOAT
         """
         p[0] = p[1]
 

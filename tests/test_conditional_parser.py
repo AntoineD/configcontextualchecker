@@ -60,18 +60,18 @@ class TestExpressionParser(unittest.TestCase):
 
     def test_Comparison(self):
         test_data = (
-            '{a} < 1',
+            '{a} <  1',
             '{a} <= 1',
-            '{a} > 1',
+            '{a} >  1',
             '{a} >= 1',
             '{a} == 1',
             '{a} != 1',
-            '{b} < 1',
-            '{b} <= 1',
-            '{b} > 1',
-            '{b} >= 1',
-            '{b} == 1',
-            '{b} != 1',
+            '{w} <  0.',
+            '{w} <= 0.',
+            '{w} >  0.',
+            '{w} >= 0.',
+            '{w} == 0.',
+            '{w} != 0.',
             '1 < {a} and {a} < 1',
             '1 < {b} and {b} < 1',
             '{a} < {b} and {b} < {c}',
@@ -81,9 +81,9 @@ class TestExpressionParser(unittest.TestCase):
             expected = eval(data.format(**self.SECTION))
             self.checkEqual(data, expected)
 
-        # strings has to be handled manually
+        # strings does not work with eval
         self.checkEqual('{d} == "e"', True)
-        self.checkEqual('{z} == "x y"', True)
+        self.checkEqual('{d} != "e"', False)
 
         # non existing item always make the condition false
         # self.checkEqual('{z} == 1', False)
