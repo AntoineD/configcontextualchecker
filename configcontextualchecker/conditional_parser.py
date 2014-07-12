@@ -48,12 +48,6 @@ class Parser(object):
     t_ignore = " \t"
 
     @staticmethod
-    def t_LIST(t):
-        r'\(\s*(\d+)\s*)(?:,\s*(\d+)\s*)+\)'
-        t.value = t.value.strip('"')
-        return t
-
-    @staticmethod
     def t_STRING(t):
         r'\"([^\\"]|(\\.))*\"'
         t.value = t.value.strip('"')
@@ -171,7 +165,7 @@ class Parser(object):
     @staticmethod
     def p_list(p):
         """
-        list : listitem COMMA
+        list : listitem COMMA item
         """
         if isinstance(p[1], list):
             p[0] += p[1]
@@ -201,6 +195,7 @@ class Parser(object):
 
     def parse_string(self, s):
         return yacc.parse(s)
+        # return yacc.parse(s, debug=1)
 
     def run(self):
         while True:
