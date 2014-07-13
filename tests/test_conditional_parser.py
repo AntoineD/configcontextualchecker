@@ -37,13 +37,13 @@ class TestExpressionParser(unittest.TestCase):
 
     def test_Contain(self):
         test_data = {
-            '{a} in (0, 1)': True,
-            '{w} in (0., 1.)': True,
+            '{a} in (1, 0)': True,
+            '{w} in (2., 0., 1.)': True,
             '{a} in (1, 1)': False,
-            # '{a} not in (0, 1)': False,
-            # '{a} not in (1, 1)': True,
+            '{a} not in (0, 1)': False,
+            '{a} not in (1, 2)': True,
             '{d} in ("x", "y")': False,
-            # '{d} not in ("x", "e")': False,
+            '{d} not in ("x", "e")': False,
             }
 
         for data, expected in test_data.items():

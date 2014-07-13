@@ -9,6 +9,8 @@ class ParserError(Exception):
 
 class Parser(object):
 
+    debug = 0
+
     tokens = (
         'BOOL',
         'INTEGER',
@@ -100,13 +102,6 @@ class Parser(object):
         ('right', 'NOT'),
     )
 
-    # @staticmethod
-    # def p_bool(p):
-    #     """
-    #     bool : BOOL
-    #     """
-    #     p[0] = p[1]
-    #
     BINARY_OPERATORS = {
         'or': lambda a, b: a or b,
         'and': lambda a, b: a and b,
@@ -168,9 +163,9 @@ class Parser(object):
         list : listitem COMMA item
         """
         if isinstance(p[1], list):
-            p[0] += p[1]
+            p[0] = p[1] + [p[3]]
         else:
-            p[0] = [p[1]]
+            p[0] = [p[1], p[3]]
 
     @staticmethod
     def p_membership(p):
@@ -178,6 +173,13 @@ class Parser(object):
         bool : item IN container
         """
         p[0] = p[1] in p[3]
+
+    @staticmethod
+    def p_membership_not(p):
+        """
+        bool : item NOT IN container
+        """
+        p[0] = p[1] not in p[4]
 
     def p_error(self, p):
         if p:
@@ -188,26 +190,8 @@ class Parser(object):
     def __init__(self, config):
         self.config = config
         self.names = {}
-        # lex.lex(module=self, debug=1)
-        # yacc.yacc(module=self, debug=1)
         lex.lex(module=self)
         yacc.yacc(module=self)
 
     def parse_string(self, s):
-        return yacc.parse(s)
-        # return yacc.parse(s, debug=1)
-
-    def run(self):
-        while True:
-            try:
-                s = raw_input('calc > ')
-            except EOFError:
-                break
-            if not s:
-                continue
-            print self.parse_string(s)
-
-
-if __name__ == '__main__':
-    calc = Parser(None)
-    calc.run()
+        return yacc.parse(s, debug=self.debug)
