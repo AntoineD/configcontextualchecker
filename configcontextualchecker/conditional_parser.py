@@ -3,18 +3,34 @@ from ply import lex, yacc
 from .dict_path import get_from_path
 
 
-class ParserError(Exception):
-    pass
+class ParserSyntaxError(SyntaxError):
+    """This class provides a syntax error for the conditional parser."""
+
+    def __init__(self, lexdata=None, string=None, position=None):
+        self.lexdata = lexdata
+        self.string = string
+        self.position = position
+
+    def __str__(self):
+        if self.string is None:
+            return 'syntax error at end of string'
+        else:
+            pointer = '-' * self.position + '^' + \
+                      '-' * (len(self.lexdata) - self.position - 1)
+            return 'syntax error at "{}"\n{}\n{}'.format(self.string,
+                                                         self.lexdata,
+                                                         pointer)
 
 
 class Parser(object):
+    """This class provides a conditional expression parser."""
 
     debug = 0
 
     tokens = (
         'BOOL',
+        'FLOAT',  # must be before INTEGER
         'INTEGER',
-        'FLOAT',
         'ITEM',
         'NOT',
         'AND',
@@ -56,14 +72,14 @@ class Parser(object):
         return t
 
     @staticmethod
-    def t_INTEGER(t):
-        r'[+-]?\d+'
+    def t_FLOAT(t):
+        r'\d+\.\d*([eE]\d+)?'
         t.value = eval(t.value)
         return t
 
     @staticmethod
-    def t_FLOAT(t):
-        r'\d+\.\d*([eE]\d+)?'
+    def t_INTEGER(t):
+        r'[+-]?\d+'
         t.value = eval(t.value)
         return t
 
@@ -182,10 +198,10 @@ class Parser(object):
         p[0] = p[1] not in p[4]
 
     def p_error(self, p):
-        if p:
-            print("Syntax error at '%s'" % p.value)
+        if p is None:
+            raise ParserSyntaxError()
         else:
-            print("Syntax error at EOF")
+            raise ParserSyntaxError(p.lexer.lexdata, p.value, p.lexpos)
 
     def __init__(self, config):
         self.config = config
