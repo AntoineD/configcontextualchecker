@@ -6,19 +6,19 @@ from .dict_path import get_from_path
 class ParserSyntaxError(SyntaxError):
     """This class provides a syntax error for the conditional parser."""
 
-    def __init__(self, lexdata=None, string=None, position=None):
-        self.lexdata = lexdata
-        self.string = string
-        self.position = position
+    def __init__(self, parser):
+        self.parser = parser
 
     def __str__(self):
-        if self.string is None:
+        if self.parser is None:
             return 'syntax error at end of string'
         else:
-            pointer = '-' * self.position + '^' + \
-                      '-' * (len(self.lexdata) - self.position - 1)
-            return 'syntax error at "{}"\n{}\n{}'.format(self.string,
-                                                         self.lexdata,
+            position = self.parser.lexpos
+            lexdata = self.parser.lexer.lexdata
+            pointer = '-' * position + '^' + \
+                      '-' * (len(lexdata) - position - 1)
+            return 'syntax error at "{}"\n{}\n{}'.format(self.parser.value,
+                                                         lexdata,
                                                          pointer)
 
 
@@ -198,14 +198,10 @@ class Parser(object):
         p[0] = p[1] not in p[4]
 
     def p_error(self, p):
-        if p is None:
-            raise ParserSyntaxError()
-        else:
-            raise ParserSyntaxError(p.lexer.lexdata, p.value, p.lexpos)
+        raise ParserSyntaxError(p)
 
     def __init__(self, config):
         self.config = config
-        self.names = {}
         lex.lex(module=self)
         yacc.yacc(module=self)
 
