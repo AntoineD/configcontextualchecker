@@ -1,7 +1,7 @@
 """This module provides the ability to check a value against a rule."""
 
 from .exceptions import ItemError
-from . import conditional_parser
+from . import condexp_parser
 from .dict_path import get_from_path
 
 
@@ -23,7 +23,7 @@ def enforce_item_rule(item_path, rule, config):
         items's value eventually converted to satisfy the rule's type
         or None if the item does not exist
     """
-    conditional_parser.set_buffer(config)
+    parser = condexp_parser.Parser(config)
 
     # determine the rule definition to use
     for cond_exp, ctx_rule in rule.items():
@@ -31,7 +31,7 @@ def enforce_item_rule(item_path, rule, config):
         if not isinstance(ctx_rule, dict):
             continue
 
-        if conditional_parser.parse_string(cond_exp):
+        if parser.parse_string(cond_exp):
             use_rule = ctx_rule
             break
     else:

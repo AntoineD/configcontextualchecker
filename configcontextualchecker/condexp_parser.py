@@ -1,3 +1,5 @@
+"""This module provides a parser for conditional expressions."""
+
 from ply import lex, yacc
 
 from .dict_path import get_from_path
