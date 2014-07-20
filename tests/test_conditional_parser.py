@@ -1,10 +1,10 @@
 import unittest
-from configcontextualchecker import conditional_parser as parser
+from configcontextualchecker.conditional_parser import Parser, ParserSyntaxError
 
 
 class TestExpressionParser(unittest.TestCase):
 
-    SECTION = {
+    CONFIG = {
         'a': 0,
         'b': 1,
         'c': 2,
@@ -13,80 +13,110 @@ class TestExpressionParser(unittest.TestCase):
         'z': 'x y',
         't': True,
         'f': False,
-        'g': {'h': 0},
+        'g': {'h': True},
         }
 
     def setUp(self):
-        parser.set_buffer(self.SECTION)
+        self.parser = Parser(self.CONFIG)
 
-    def checkEqual(self, data, expected):
-        result = parser.parse_string(data)
+    def checkEqual(self, data, expected=None):
+        """Check parsing result."""
+        result = self.parser.parse_string(data)
+        if expected is None:
+            expected = eval(data.format(**self.CONFIG))
         self.assertEqual(result, expected)
+
+    def CheckErrors(self, test_data):
+        """Check raised error messages."""
+        for data, error_items in test_data.items():
+            with self.assertRaises(ParserSyntaxError) as error:
+                self.parser.parse_string(data)
+            print error.exception
+            if error_items is None:
+                expected = ParserSyntaxError.MSG_EOS
+            else:
+                expected = ParserSyntaxError.MSG_PATTERN.format(*error_items)
+            self.assertEqual(str(error.exception), expected)
 
     def test_ContainRaises(self):
         test_data = {
-            # no list
-            '{a} in 0': parser.ParserError,
-            '{a} not in 0': parser.ParserError,
-            # bad type
-            '{a} in (x, y)': TypeError,
-            }
+            '0 in (0': None,
+            '0 in 0': (
+                '0',
+                '0 in 0',
+                '-----^',
+            ),
+            '0 in 0)': (
+                '0',
+                '0 in 0)',
+                '-----^-',
+            ),
+            '0 in ()': (
+                ')',
+                '0 in ()',
+                '------^',
+            ),
+            '0 in (0)': (
+                ')',
+                '0 in (0)',
+                '-------^',
+            ),
+            '0 in (0,)': (
+                ')',
+                '0 in (0,)',
+                '--------^',
+            ),
+        }
 
-        for data, error in test_data.items():
-            self.assertRaises(error, parser.parse_string, data)
+        self.CheckErrors(test_data)
 
     def test_Contain(self):
-        test_data = {
-            '{a} in (0, 1)': True,
-            '{w} in (0., 1.)': True,
-            '{a} in (1, 1)': False,
-            '{a} not in (0, 1)': False,
-            '{a} not in (1, 1)': True,
-            '{d} in (x, y)': False,
-            '{d} not in (x, e)': False,
-            }
-
-        for data, expected in test_data.items():
-            self.checkEqual(data, expected)
-
-    def test_ComparisonRaises(self):
-        # bad type
         test_data = (
-            '{a} < a',
+            '1 in (1, 0)',
+            '0. in (2., 1., 0.)',
+            '0 in (1, 1)',
+            '0 not in (2, 0, 1)',
+            '0 not in (1, 2)',
+            '"e" in ("x", "y")',
+            '"e" not in ("x", "e")',
             )
 
         for data in test_data:
-            self.assertRaises(TypeError, parser.parse_string, data)
+            self.checkEqual(data)
+
+    def test_ComparisonRaises(self):
+        test_data = {
+            '0 < "a"': (
+                'a',
+                '0 < "a"',
+                '----^--',
+            )
+        }
+
+        self.CheckErrors(test_data)
 
     def test_Comparison(self):
         test_data = (
-            '{a} < 1',
-            '{a} <= 1',
-            '{a} > 1',
-            '{a} >= 1',
-            '{a} == 1',
-            '{a} != 1',
-            '{b} < 1',
-            '{b} <= 1',
-            '{b} > 1',
-            '{b} >= 1',
-            '{b} == 1',
-            '{b} != 1',
-            '1 < {a} < 1',
-            '1 < {b} < 1',
-            '{a} < {b} < {c}',
+            '0 <  0',
+            '0 <= 0',
+            '0 >  0',
+            '0 >= 0',
+            '0 == 0',
+            '0 != 0',
+            '0. <  0.',
+            '0. <= 0.',
+            '0. >  0.',
+            '0. >= 0.',
+            '0. == 0.',
+            '0. != 0.',
             )
 
         for data in test_data:
-            expected = eval(data.format(**self.SECTION))
-            self.checkEqual(data, expected)
+            self.checkEqual(data)
 
-        # strings has to be handled manually
-        self.checkEqual('{d} == e', True)
-        self.checkEqual('{z} == "x y"', True)
-
-        # non existing item always make the condition false
-        self.checkEqual('{z} == 1', False)
+        # strings does not work with eval
+        self.checkEqual('"e" == "e"', True)
+        self.checkEqual('"e" != "e"', False)
 
     def test_Condition(self):
         test_data = (
@@ -112,8 +142,7 @@ class TestExpressionParser(unittest.TestCase):
             )
 
         for data in test_data:
-            expected = eval(data)
-            self.checkEqual(data, expected)
+            self.checkEqual(data)
 
         # testing with items
         test_data2 = list()
@@ -123,21 +152,21 @@ class TestExpressionParser(unittest.TestCase):
             test_data2 += [data]
 
         for data in test_data2:
-            expected = eval(data.format(**self.SECTION))
-            self.checkEqual(data, expected)
+            self.checkEqual(data)
 
     def test_compound(self):
-        test_data = {
-            '{a} in (0, 1) and {b} == 1': True,
-            '({a} in (0, 1) or {b} > 1) and {c} != 2': False,
-            }
+        test_data = (
+            '{a} in (0, 1) and {b} == 1',
+            '({a} in (0, 1) or {b} > 1) and {c} != 2',
+            '{a} < {b} and {b} < {c}',
+            )
 
-        for data, expected in test_data.items():
-            self.checkEqual(data, expected)
+        for data in test_data:
+            self.checkEqual(data)
 
     def test_dict_path(self):
         test_data = {
-            '{/g/h} == 0': True,
+            '{/g/h}': True,
             }
 
         for data, expected in test_data.items():
