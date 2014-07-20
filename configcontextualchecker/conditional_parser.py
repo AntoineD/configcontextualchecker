@@ -6,20 +6,21 @@ from .dict_path import get_from_path
 class ParserSyntaxError(SyntaxError):
     """This class provides a syntax error for the conditional parser."""
 
+    MSG_EOS = 'syntax error at end of string'
+    MSG_PATTERN = 'syntax error at "{}"\n{}\n{}'
+
     def __init__(self, parser):
         self.parser = parser
 
     def __str__(self):
         if self.parser is None:
-            return 'syntax error at end of string'
+            return self.MSG_EOS
         else:
             position = self.parser.lexpos
             lexdata = self.parser.lexer.lexdata
             pointer = '-' * position + '^' + \
                       '-' * (len(lexdata) - position - 1)
-            return 'syntax error at "{}"\n{}\n{}'.format(self.parser.value,
-                                                         lexdata,
-                                                         pointer)
+            return self.MSG_PATTERN.format(self.parser.value, lexdata, pointer)
 
 
 class Parser(object):
@@ -148,8 +149,6 @@ class Parser(object):
              | bool OR bool
              | bool AND bool
         """
-        # import pudb; pudb.set_trace()
-        # check type consistency for numbers
         p[0] = cls.BINARY_OPERATORS[p[2]](p[1], p[3])
 
     @staticmethod

@@ -1,5 +1,5 @@
 import unittest
-from configcontextualchecker.conditional_parser import Parser
+from configcontextualchecker.conditional_parser import Parser, ParserSyntaxError
 
 
 class TestExpressionParser(unittest.TestCase):
@@ -25,42 +25,60 @@ class TestExpressionParser(unittest.TestCase):
 
     def test_ContainRaises(self):
         test_data = {
-            # no valid list
-            '0 in 0': None,
             '0 in (0': None,
-            '0 in 0)': None,
-            '0 in ()': None,
-            '0 in (0)': None,
-            '0 in (0,)': None,
-            # bad type
-            '0 in (0., 1.)': TypeError,
-            }
+            '0 in 0': (
+                '0',
+                '0 in 0',
+                '-----^',
+            ),
+            '0 in 0)': (
+                '0',
+                '0 in 0)',
+                '-----^-',
+            ),
+            '0 in ()': (
+                ')',
+                '0 in ()',
+                '------^',
+            ),
+            '0 in (0)': (
+                ')',
+                '0 in (0)',
+                '-------^',
+            ),
+            '0 in (0,)': (
+                ')',
+                '0 in (0,)',
+                '--------^',
+            ),
+        }
 
-        for data, error in test_data.items():
-            try:
+        for data, error_items in test_data.items():
+            with self.assertRaises(ParserSyntaxError) as error:
                 self.parser.parse_string(data)
-            except Exception as e:
-                print e
-            # self.assertRaises(error, parser.parse_string, data)
+            if error_items is None:
+                expected = ParserSyntaxError.MSG_EOS
+            else:
+                expected = ParserSyntaxError.MSG_PATTERN.format(*error_items)
+            self.assertEqual(str(error.exception), expected)
 
     def test_Contain(self):
         test_data = {
             '1 in (1, 0)': True,
             '0. in (2., 1., 0.)': True,
-            '{a} in (1, 1)': False,
-            '{a} not in (0, 1)': False,
-            '{a} not in (1, 2)': True,
-            '{d} in ("x", "y")': False,
-            '{d} not in ("x", "e")': False,
+            '0 in (1, 1)': False,
+            '0 not in (0, 1)': False,
+            '0 not in (1, 2)': True,
+            '"e" in ("x", "y")': False,
+            '"e" not in ("x", "e")': False,
             }
 
         for data, expected in test_data.items():
             self.checkEqual(data, expected)
 
     def test_ComparisonRaises(self):
-        # bad type
         test_data = (
-            '{a} < "a"',
+            '0 < "a"',
             )
 
         for data in test_data:
@@ -68,18 +86,18 @@ class TestExpressionParser(unittest.TestCase):
 
     def test_Comparison(self):
         test_data = (
-            '{a} <  1',
-            '{a} <= 1',
-            '{a} >  1',
-            '{a} >= 1',
-            '{a} == 1',
-            '{a} != 1',
-            '{w} <  0.',
-            '{w} <= 0.',
-            '{w} >  0.',
-            '{w} >= 0.',
-            '{w} == 0.',
-            '{w} != 0.',
+            '0 <  0',
+            '0 <= 0',
+            '0 >  0',
+            '0 >= 0',
+            '0 == 0',
+            '0 != 0',
+            '0. <  0.',
+            '0. <= 0.',
+            '0. >  0.',
+            '0. >= 0.',
+            '0. == 0.',
+            '0. != 0.',
             '1 < {a} and {a} < 1',
             '1 < {b} and {b} < 1',
             '{a} < {b} and {b} < {c}',
@@ -90,11 +108,8 @@ class TestExpressionParser(unittest.TestCase):
             self.checkEqual(data, expected)
 
         # strings does not work with eval
-        self.checkEqual('{d} == "e"', True)
-        self.checkEqual('{d} != "e"', False)
-
-        # non existing item always make the condition false
-        # self.checkEqual('{z} == 1', False)
+        self.checkEqual('"e" == "e"', True)
+        self.checkEqual('"e" != "e"', False)
 
     def test_Condition(self):
         test_data = (
