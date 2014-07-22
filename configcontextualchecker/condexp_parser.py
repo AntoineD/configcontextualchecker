@@ -1,39 +1,16 @@
 """This module provides a parser for conditional expressions."""
 
-from ply import lex, yacc
-
 from .dict_path import get_from_path
+from .parser_base import ParserBase
 
 
-class ParserSyntaxError(SyntaxError):
-    """This class provides a syntax error for the conditional parser."""
-
-    MSG_EOS = 'syntax error at end of string'
-    MSG_PATTERN = 'syntax error at "{}"\n{}\n{}'
-
-    def __init__(self, parser):
-        self.parser = parser
-
-    def __str__(self):
-        if self.parser is None:
-            return self.MSG_EOS
-        else:
-            position = self.parser.lexpos
-            lexdata = self.parser.lexer.lexdata
-            pointer = '-' * position + '^' + \
-                      '-' * (len(lexdata) - position - 1)
-            return self.MSG_PATTERN.format(self.parser.value, lexdata, pointer)
-
-
-class Parser(object):
+class Parser(ParserBase):
     """This class provides a conditional expression parser."""
 
     debug = 0
 
-    tokens = (
+    tokens = ParserBase.tokens + (
         'BOOL',
-        'FLOAT',  # must be before INTEGER
-        'INTEGER',
         'ITEM',
         'NOT',
         'AND',
@@ -47,7 +24,6 @@ class Parser(object):
         'LE',
         'GE',
         'STRING',
-        'COMMA',
         'IN',
     )
 
@@ -63,27 +39,12 @@ class Parser(object):
     t_GT = r'>'
     t_LE = r'<='
     t_GE = r'>='
-    t_COMMA = r','
     t_IN = r'in'
-
-    t_ignore = " \t"
 
     @staticmethod
     def t_STRING(t):
         r'\"([^\\"]|(\\.))*\"'
         t.value = t.value.strip('"')
-        return t
-
-    @staticmethod
-    def t_FLOAT(t):
-        r'\d+\.\d*([eE]\d+)?'
-        t.value = eval(t.value)
-        return t
-
-    @staticmethod
-    def t_INTEGER(t):
-        r'[+-]?\d+'
-        t.value = eval(t.value)
         return t
 
     @staticmethod
@@ -100,16 +61,10 @@ class Parser(object):
             str: 'STRING',
             bool: 'BOOL',
         }
-        # import pudb; pudb.set_trace()
         # TODO: check existence or error out
         t.value = get_from_path(self.config, t.value.strip('{}'))
         t.type = type_token[type(t.value)]
         return t
-
-    @staticmethod
-    def t_error(t):
-        print("Illegal character '%s'" % t.value[0])
-        t.lexer.skip(1)
 
     # Parsing rules
 
@@ -197,14 +152,3 @@ class Parser(object):
         bool : item NOT IN container
         """
         p[0] = p[1] not in p[4]
-
-    def p_error(self, p):
-        raise ParserSyntaxError(p)
-
-    def __init__(self, config):
-        self.config = config
-        lex.lex(module=self)
-        yacc.yacc(module=self)
-
-    def parse_string(self, s):
-        return yacc.parse(s, debug=self.debug)

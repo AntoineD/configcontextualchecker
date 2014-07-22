@@ -5,9 +5,7 @@ A raw rule is a rule where items value may be string representation of other pyt
 When the function returns, the raw rule is converted into a rule where all the values that have non string types associated have been converted to the relevant type.
 """
 
-import string
-
-from pyparsing import QuotedString, ParseException
+import re
 
 from .range import parse_range, Range
 from .rule_enforcer import check_value
@@ -15,7 +13,7 @@ from .exceptions import RuleError
 
 
 # pattern to identify a condition expression
-CONDEXP_KEY_PATTERN = QuotedString(quoteChar='{', endQuoteChar='}')
+ITEM_PARSER = re.compile(r'(?:{(.+?)})')
 
 # rules for checking rule items
 RULE_META_RULE = {
@@ -188,12 +186,12 @@ def _parse_allowed(allowed, type_):
     return [check_value(value, True, type_) for value in allowed]
 
 
-def _parse_dependencies(string):
+def _parse_dependencies(condexp):
     """Determine the dependencies from a conditional expression.
 
     Parameters
     ----------
-    string : str
+    condexp : str
         a conditional expression
 
     Returns
@@ -206,9 +204,9 @@ def _parse_dependencies(string):
     RuleError
         when there is no dependency found
     """
-    parsed = CONDEXP_KEY_PATTERN.searchString(string).asList()
+    parsed = ITEM_PARSER.findall(condexp)
     if parsed:
         return list(t[0] for t in parsed)
     else:
-        msg = 'no dependency found in section {0}'.format(string)
+        msg = 'no dependency found in section {0}'.format(condexp)
         raise RuleError(msg)
