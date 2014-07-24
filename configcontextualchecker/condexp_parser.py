@@ -41,6 +41,10 @@ class Parser(ParserBase):
     t_GE = r'>='
     t_IN = r'in'
 
+    def __init__(self, config):
+        super(Parser, self).__init__()
+        self.config = config
+
     @staticmethod
     def t_STRING(t):
         r'\"([^\\"]|(\\.))*\"'

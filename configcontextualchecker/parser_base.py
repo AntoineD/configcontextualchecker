@@ -19,6 +19,10 @@ class ParserBase(object):
 
     t_ignore = " \t"
 
+    def __init__(self):
+        lex.lex(module=self)
+        self.parser = yacc.yacc(module=self)
+
     @staticmethod
     def t_FLOAT(t):
         r'\d+\.\d*([eE]\d+)?'
@@ -60,11 +64,5 @@ class ParserBase(object):
 
     def p_error(self, p):
         raise ParserSyntaxError(p)
-
-    def __init__(self, config):
-        self.config = config
-        lex.lex(module=self)
-        self.parser = yacc.yacc(module=self)
-
     def parse_string(self, s):
         return self.parser(s, debug=self.debug)
