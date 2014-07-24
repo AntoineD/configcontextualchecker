@@ -11,26 +11,6 @@ class TestRangeParser(unittest.TestCase):
     def setUp(self):
         self.parser = RangeParser()
 
-    # def checkEqual(self, data, expected=None):
-    #     """Check parsing result."""
-    #     result = self.parser.parse_string(data)
-    #     if expected is None:
-    #         expected = eval(data.format(**self.CONFIG))
-    #     self.assertEqual(result, expected)
-    #
-    # def CheckErrors(self, test_data):
-    #     """Check raised error messages."""
-    #     for data, error_items in test_data.items():
-    #         with self.assertRaises(ParserSyntaxError) as error:
-    #             self.parser.parse_string(data)
-    #         print error.exception
-    #         if error_items is None:
-    #             expected = ParserSyntaxError.MSG_EOS
-    #         else:
-    #             expected = ParserSyntaxError.MSG_PATTERN.format(*error_items)
-    #         self.assertEqual(str(error.exception), expected)
-    #
-
     def test_Bound(self):
         data = {
             # lower open
@@ -149,7 +129,7 @@ class TestRangeParser(unittest.TestCase):
     def test_type(self):
         data = {
             (0, 1): int,
-            (None, 0): int,
+            (None, 0.): float,
             (0, None): int,
         }
         for bounds, expected_type in data.items():

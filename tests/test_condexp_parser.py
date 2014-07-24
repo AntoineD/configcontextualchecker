@@ -4,7 +4,29 @@ from configcontextualchecker.condexp_parser import Parser
 from configcontextualchecker.exceptions import ParserSyntaxError
 
 
-class TestExpressionParser(unittest.TestCase):
+class ErrorChecking(object):
+    """Mixin class for error checking of exceptions."""
+
+    def checkErrors(self, test_data):
+        """Check raised error messages.
+
+        Parameters
+        ----------
+        test_data : dict
+            dictionary with test data and expected error message items.
+        """
+        for data, error_items in test_data.items():
+            with self.assertRaises(ParserSyntaxError) as error:
+                self.parser.parse_string(data)
+            print error.exception
+            if error_items is None:
+                expected = ParserSyntaxError.MSG_EOS
+            else:
+                expected = ParserSyntaxError.MSG_PATTERN.format(*error_items)
+            self.assertEqual(str(error.exception), expected)
+
+
+class TestExpressionParser(unittest.TestCase, ErrorChecking):
 
     CONFIG = {
         'a': 0,
@@ -27,18 +49,6 @@ class TestExpressionParser(unittest.TestCase):
         if expected is None:
             expected = eval(data.format(**self.CONFIG))
         self.assertEqual(result, expected)
-
-    def CheckErrors(self, test_data):
-        """Check raised error messages."""
-        for data, error_items in test_data.items():
-            with self.assertRaises(ParserSyntaxError) as error:
-                self.parser.parse_string(data)
-            print error.exception
-            if error_items is None:
-                expected = ParserSyntaxError.MSG_EOS
-            else:
-                expected = ParserSyntaxError.MSG_PATTERN.format(*error_items)
-            self.assertEqual(str(error.exception), expected)
 
     def test_ContainRaises(self):
         test_data = {
@@ -70,7 +80,7 @@ class TestExpressionParser(unittest.TestCase):
             ),
         }
 
-        self.CheckErrors(test_data)
+        self.checkErrors(test_data)
 
     def test_Contain(self):
         test_data = (
@@ -95,7 +105,7 @@ class TestExpressionParser(unittest.TestCase):
             )
         }
 
-        self.CheckErrors(test_data)
+        self.checkErrors(test_data)
 
     def test_Comparison(self):
         test_data = (
