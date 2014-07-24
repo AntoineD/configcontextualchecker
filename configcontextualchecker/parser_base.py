@@ -54,7 +54,7 @@ class ParserBase(object):
 
     @staticmethod
     def t_error(t):
-        # TODO: use exception (ADe 24/07/14)
+        # TODO: use exception? (ADe 24/07/14)
         print("Illegal character '%s'" % t.value[0])
         t.lexer.skip(1)
 
