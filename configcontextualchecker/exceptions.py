@@ -9,6 +9,32 @@ class ItemError(Exception):
     pass
 
 
+class ParserSyntaxError(SyntaxError):
+    """This class provides a syntax error for the conditional parser."""
+
+    MSG_EOS = 'syntax error at end of string'
+    MSG_PATTERN = 'syntax error at "{}"\n{}\n{}'
+
+    def __init__(self, parser):
+        """
+        Parameters
+        ----------
+        parser : parser object
+            parser that raised the error
+        """
+        self.parser = parser
+
+    def __str__(self):
+        if self.parser is None:
+            return self.MSG_EOS
+        else:
+            position = self.parser.lexpos
+            lexdata = self.parser.lexer.lexdata
+            pointer = '-' * position + '^' + \
+                      '-' * (len(lexdata) - position - 1)
+            return self.MSG_PATTERN.format(self.parser.value, lexdata, pointer)
+
+
 # class DependencyError(Exception):
 #     """Error class for the dependency scanner."""
 #

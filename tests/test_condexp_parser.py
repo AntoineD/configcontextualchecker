@@ -1,5 +1,7 @@
 import unittest
-from configcontextualchecker.conditional_parser import Parser, ParserSyntaxError
+
+from configcontextualchecker.condexp_parser import Parser
+from configcontextualchecker.exceptions import ParserSyntaxError
 
 
 class TestExpressionParser(unittest.TestCase):
