@@ -1,13 +1,35 @@
 import unittest
 import sys
 
-from pyparsing import ParseException
-
-from configcontextualchecker.range.range_parser import LowerBound, UpperBound, _get_range_args
-from configcontextualchecker.range import Range, parse_range
+from configcontextualchecker.range.range_parser import LowerBound, UpperBound
+from configcontextualchecker.range import Range, RangeParser
+from configcontextualchecker.exceptions import ParserSyntaxError
 
 
 class TestRangeParser(unittest.TestCase):
+
+    def setUp(self):
+        self.parser = RangeParser()
+
+    # def checkEqual(self, data, expected=None):
+    #     """Check parsing result."""
+    #     result = self.parser.parse_string(data)
+    #     if expected is None:
+    #         expected = eval(data.format(**self.CONFIG))
+    #     self.assertEqual(result, expected)
+    #
+    # def CheckErrors(self, test_data):
+    #     """Check raised error messages."""
+    #     for data, error_items in test_data.items():
+    #         with self.assertRaises(ParserSyntaxError) as error:
+    #             self.parser.parse_string(data)
+    #         print error.exception
+    #         if error_items is None:
+    #             expected = ParserSyntaxError.MSG_EOS
+    #         else:
+    #             expected = ParserSyntaxError.MSG_PATTERN.format(*error_items)
+    #         self.assertEqual(str(error.exception), expected)
+    #
 
     def test_Bound(self):
         data = {
@@ -146,10 +168,11 @@ class TestRangeParser(unittest.TestCase):
         }
 
         for string, expected in data.items():
-            args = _get_range_args(string)
+            args = self.parser._get_range_args(string)
             # test bound values type explicitely as for python 0 == 0.
             self.assertEqual(type(args[0]), type(expected[0]))
             self.assertEqual(expected, args)
 
         # KO
-        self.assertRaises(ParseException, parse_range, '')
+        with self.assertRaises(ParserSyntaxError):
+            self.parser.parse_range('')
