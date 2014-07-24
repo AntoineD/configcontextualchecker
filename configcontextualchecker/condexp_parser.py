@@ -7,8 +7,6 @@ from .parser_base import ParserBase
 class Parser(ParserBase):
     """This class provides a conditional expression parser."""
 
-    debug = 0
-
     tokens = ParserBase.tokens + (
         'BOOL',
         'ITEM',
@@ -42,6 +40,12 @@ class Parser(ParserBase):
     t_IN = r'in'
 
     def __init__(self, config):
+        """
+        Parameters
+        ----------
+        config : dict
+            config dictionary
+        """
         super(Parser, self).__init__()
         self.config = config
 

@@ -8,6 +8,8 @@ from .exceptions import ParserSyntaxError
 class ParserBase(object):
     """This class provides a conditional expression parser."""
 
+    debug = 0
+
     tokens = (
         'FLOAT',  # must be before INTEGER
         'INTEGER',
@@ -20,8 +22,23 @@ class ParserBase(object):
     t_ignore = " \t"
 
     def __init__(self):
+        # TODO: do we need a lexer object? (ADe 24/07/14)
         lex.lex(module=self)
         self.parser = yacc.yacc(module=self)
+
+    def parse_string(self, string):
+        """Parse a string.
+
+        Parameters
+        ----------
+        string : str
+            string to be parsed
+
+        Returns
+        -------
+        parsed object (derived class dependent)
+        """
+        return self.parser.parse(string, debug=self.debug)
 
     @staticmethod
     def t_FLOAT(t):
@@ -37,32 +54,9 @@ class ParserBase(object):
 
     @staticmethod
     def t_error(t):
+        # TODO: use exception (ADe 24/07/14)
         print("Illegal character '%s'" % t.value[0])
         t.lexer.skip(1)
 
-    # Parsing rules
-    @staticmethod
-    def p_paren(p):
-        """
-        bool : LPAREN bool RPAREN
-        container : LPAREN list RPAREN
-        """
-        p[0] = p[2]
-
-    @staticmethod
-    def p_self(p):
-        """
-        bool : BOOL
-        number : INTEGER
-               | FLOAT
-        item : number
-             | STRING
-        listitem : item
-                 | list
-        """
-        p[0] = p[1]
-
     def p_error(self, p):
         raise ParserSyntaxError(p)
-    def parse_string(self, s):
-        return self.parser(s, debug=self.debug)
