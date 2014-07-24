@@ -1,4 +1,5 @@
 import unittest
+import os
 
 from configcontextualchecker.condexp_parser import Parser
 from configcontextualchecker.exceptions import ParserSyntaxError
@@ -6,6 +7,8 @@ from configcontextualchecker.exceptions import ParserSyntaxError
 
 class ErrorChecking(object):
     """Mixin class for error checking of exceptions."""
+
+    __show = os.environ.get('SHOW_EXCEPTION', False)
 
     def checkErrors(self, test_data):
         """Check raised error messages.
@@ -23,6 +26,8 @@ class ErrorChecking(object):
                 expected = ParserSyntaxError.MSG_EOS
             else:
                 expected = ParserSyntaxError.MSG_PATTERN.format(*error_items)
+            if self.__show:
+                print error.exception
             self.assertEqual(str(error.exception), expected)
 
 
