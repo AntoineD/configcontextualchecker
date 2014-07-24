@@ -7,9 +7,9 @@ When the function returns, the raw rule is converted into a rule where all the v
 
 import re
 
-from .range import parse_range, Range
+from .range import RangeParser, Range
 from .rule_enforcer import check_value
-from .exceptions import RuleError
+from .exceptions import RuleError, ParserSyntaxError
 
 
 # pattern to identify a condition expression
@@ -37,6 +37,8 @@ RULE_META_RULE = {
         # 'type': determined from rule's type
     },
 }
+
+RANGE_PARSER = RangeParser()
 
 
 def parse_rule(rule):
@@ -163,8 +165,8 @@ def _parse_allowed(allowed, type_):
         # deal first with range representation so range type checking is
         # done once
         try:
-            allowed = parse_range(allowed)
-        except ParseException:
+            allowed = RANGE_PARSER.parse_range(allowed)
+        except ParserSyntaxError:
             pass
 
     if isinstance(allowed, Range):
@@ -206,7 +208,7 @@ def _parse_dependencies(condexp):
     """
     parsed = ITEM_PARSER.findall(condexp)
     if parsed:
-        return list(t[0] for t in parsed)
+        return parsed
     else:
         msg = 'no dependency found in section {0}'.format(condexp)
         raise RuleError(msg)
