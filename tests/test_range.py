@@ -5,8 +5,10 @@ from configcontextualchecker.range.range_parser import LowerBound, UpperBound
 from configcontextualchecker.range import Range, RangeParser
 from configcontextualchecker.exceptions import ParserSyntaxError
 
+from .test_condexp_parser import ErrorChecking
 
-class TestRangeParser(unittest.TestCase):
+
+class TestRangeParser(unittest.TestCase, ErrorChecking):
 
     def setUp(self):
         self.parser = RangeParser()
@@ -154,5 +156,33 @@ class TestRangeParser(unittest.TestCase):
             self.assertEqual(expected, args)
 
         # KO
-        with self.assertRaises(ParserSyntaxError):
-            self.parser.parse_range('')
+        data = {
+            ']0,1': None,
+            ']0,]': (
+                ']',
+                ']0,]',
+                '---^',
+            ),
+            ']0 1]': (
+                '1',
+                ']0 1]',
+                '---^-',
+            ),
+            '],1]': (
+                ',',
+                '],1]',
+                '-^--',
+            ),
+            '0,1]': (
+                '0',
+                '0,1]',
+                '^---',
+            ),
+            '[inf,1]': (
+                ',',
+                '[inf,1]',
+                '----^--',
+            ),
+        }
+
+        self.checkErrors(data)
