@@ -5,7 +5,13 @@ from .parser_base import ParserBase
 
 
 class Parser(ParserBase):
-    """This class provides a conditional expression parser."""
+    """This class provides a conditional expression parser.
+
+    Parameters
+    ----------
+    config : dict
+        a config object.
+    """
 
     tokens = ParserBase.tokens + (
         'BOOL',
@@ -39,15 +45,9 @@ class Parser(ParserBase):
     t_GE = r'>='
     t_IN = r'in'
 
-    def __init__(self, config):
-        """
-        Parameters
-        ----------
-        config : dict
-            config dictionary
-        """
+    def __init__(self):
         super(Parser, self).__init__()
-        self.config = config
+        self.config = dict()
 
     @staticmethod
     def t_STRING(t):

@@ -4,6 +4,8 @@ from .exceptions import ItemError
 from . import condexp_parser
 from .dict_path import get_from_path
 
+CONDEXP_PARSER = condexp_parser.Parser()
+
 
 def enforce_item_rule(item_path, rule, config):
     """Check a config's item against a rule.
@@ -23,7 +25,7 @@ def enforce_item_rule(item_path, rule, config):
         items's value eventually converted to satisfy the rule's type
         or None if the item does not exist
     """
-    parser = condexp_parser.Parser(config)
+    CONDEXP_PARSER.config = config
 
     # determine the rule definition to use
     for cond_exp, ctx_rule in rule.items():
@@ -31,7 +33,7 @@ def enforce_item_rule(item_path, rule, config):
         if not isinstance(ctx_rule, dict):
             continue
 
-        if parser.parse_string(cond_exp):
+        if CONDEXP_PARSER.parse_string(cond_exp):
             use_rule = ctx_rule
             break
     else:

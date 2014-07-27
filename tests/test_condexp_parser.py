@@ -46,7 +46,8 @@ class TestExpressionParser(unittest.TestCase, ErrorChecking):
         }
 
     def setUp(self):
-        self.parser = Parser(self.CONFIG)
+        self.parser = Parser()
+        self.parser.config = self.CONFIG
 
     def checkEqual(self, data, expected=None):
         """Check parsing result."""
