@@ -1,0 +1,3 @@
+remove unused ITEM token warning
+add logging
+better error messages
