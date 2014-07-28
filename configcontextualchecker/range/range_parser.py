@@ -57,9 +57,9 @@ class RangeParser(ParserBase):
         list
             Range object init arguments
         """
-        return self.parse_string(string)
+        return super(RangeParser, self).parse(string)
 
-    def parse_range(self, string):
+    def parse(self, string):
         """Parse a range expression.
 
         Parameters

@@ -165,7 +165,7 @@ def _parse_allowed(allowed, type_):
         # deal first with range representation so range type checking is
         # done once
         try:
-            allowed = RANGE_PARSER.parse_range(allowed)
+            allowed = RANGE_PARSER.parse(allowed)
         except ParserSyntaxError:
             pass
 

@@ -20,7 +20,7 @@ class ErrorChecking(object):
         """
         for data, error_items in test_data.items():
             with self.assertRaises(ParserSyntaxError) as error:
-                self.parser.parse_string(data)
+                self.parser.parse(data)
             print error.exception
             if error_items is None:
                 expected = ParserSyntaxError.MSG_EOS
@@ -51,7 +51,7 @@ class TestExpressionParser(unittest.TestCase, ErrorChecking):
 
     def checkEqual(self, data, expected=None):
         """Check parsing result."""
-        result = self.parser.parse_string(data)
+        result = self.parser.parse(data)
         if expected is None:
             expected = eval(data.format(**self.CONFIG))
         self.assertEqual(result, expected)

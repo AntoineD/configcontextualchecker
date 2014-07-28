@@ -33,7 +33,7 @@ def enforce_item_rule(item_path, rule, config):
         if not isinstance(ctx_rule, dict):
             continue
 
-        if CONDEXP_PARSER.parse_string(cond_exp):
+        if CONDEXP_PARSER.parse(cond_exp):
             use_rule = ctx_rule
             break
     else:

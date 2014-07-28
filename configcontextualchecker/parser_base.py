@@ -11,7 +11,7 @@ class ParserBase(object):
     debug = False
 
     tokens = (
-        'FLOAT',  # must be before INTEGER
+        'FLOAT',  # must be before INTEGER to catch decimal point
         'INTEGER',
         'COMMA',
     )
@@ -27,7 +27,7 @@ class ParserBase(object):
                                 debug=self.debug,
                                 write_tables=False)
 
-    def parse_string(self, string):
+    def parse(self, string):
         """Parse a string.
 
         Parameters
