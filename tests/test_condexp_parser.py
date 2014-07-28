@@ -183,9 +183,21 @@ class TestExpressionParser(unittest.TestCase, ErrorChecking):
             self.checkEqual(data)
 
     def test_dict_path(self):
+        # OK
         test_data = {
             '{/g/h}': True,
             }
 
         for data, expected in test_data.items():
             self.checkEqual(data, expected)
+
+        # KO
+        test_data = {
+            '{/foo} == 0': (
+                '==',
+                '{/foo} == 0',
+                '-------^---',
+            )
+        }
+
+        self.checkErrors(test_data)

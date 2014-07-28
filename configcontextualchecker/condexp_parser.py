@@ -69,8 +69,13 @@ class Parser(ParserBase):
             str: 'STRING',
             bool: 'BOOL',
         }
-        # TODO: check existence or error out
-        t.value = get_from_path(self.config, t.value.strip('{}'))
+        key_path = t.value.strip('{}')
+        value = get_from_path(self.config, key_path)
+        if value is None:
+            print 'key path "{}" does not exist'.format(key_path)
+            t.lexer.skip(1)
+            return
+        t.value = value
         t.type = type_token[type(t.value)]
         return t
 
