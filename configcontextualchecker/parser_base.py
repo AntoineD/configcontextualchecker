@@ -8,7 +8,7 @@ from .exceptions import ParserSyntaxError
 class ParserBase(object):
     """This class provides a conditional expression parser."""
 
-    debug = 0
+    debug = False
 
     tokens = (
         'FLOAT',  # must be before INTEGER
@@ -22,9 +22,10 @@ class ParserBase(object):
     t_ignore = " \t"
 
     def __init__(self):
-        # TODO: do we need a lexer object? (ADe 24/07/14)
         lex.lex(module=self)
-        self.parser = yacc.yacc(module=self)
+        self.parser = yacc.yacc(module=self,
+                                debug=self.debug,
+                                write_tables=False)
 
     def parse_string(self, string):
         """Parse a string.
