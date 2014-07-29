@@ -22,7 +22,7 @@ class ParserBase(object):
     t_ignore = " \t"
 
     def __init__(self):
-        lex.lex(module=self)
+        self.lexer = lex.lex(module=self)
         self.parser = yacc.yacc(module=self,
                                 debug=self.debug,
                                 write_tables=False)
@@ -39,7 +39,7 @@ class ParserBase(object):
         -------
         parsed object (derived class dependent)
         """
-        return self.parser.parse(string, debug=self.debug)
+        return self.parser.parse(string, lexer=self.lexer, debug=self.debug)
 
     @staticmethod
     def t_FLOAT(t):
