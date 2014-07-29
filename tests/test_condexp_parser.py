@@ -21,13 +21,13 @@ class ErrorChecking(object):
         for data, error_items in test_data.items():
             with self.assertRaises(ParserSyntaxError) as error:
                 self.parser.parse(data)
-            print error.exception
+            print(error.exception)
             if error_items is None:
                 expected = ParserSyntaxError.MSG_EOS
             else:
                 expected = ParserSyntaxError.MSG_PATTERN.format(*error_items)
             if self.__show:
-                print error.exception
+                print(error.exception)
             self.assertEqual(str(error.exception), expected)
 
 
