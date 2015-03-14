@@ -141,7 +141,8 @@ def _parse_rule_items(rule):
 
     # check there's no illegal keys
     if not set(rule).issubset(set(RULE_META_RULE)):
-        msg = 'item with key "{0}" is not a valid rule item'.format(key)
+        keys = set(rule) - set(RULE_META_RULE)
+        msg = 'item with keys "{0}" is not a valid rule item'.format(keys)
         raise RuleError(msg)
 
     return new_rule
