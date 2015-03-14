@@ -23,6 +23,7 @@ def get_from_path(dict_, path):
     if path.startswith(PATH_SEP):
         path = path[1:]
         d = dict_
+        v = None
         for p in path.split(PATH_SEP):
             try:
                 v = d[p]
