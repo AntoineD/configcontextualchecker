@@ -1,9 +1,19 @@
-"""This module provides the rule parser.
+"""This module provides a parser for the rule definitions.
 
-The function :function:`parse_rule` parse and check each items of a raw rule.
-A raw rule is a rule where items value may be string representation of other python types.
-When the function returns, the raw rule is converted into a rule where all the values that have non string types
-associated have been converted to the relevant type.
+The function :function:`parse_rule` parse and check each items of a rule
+definition.
+A rule definition is a rule where items value may be string representation of
+other python types.
+When the function :function:`parse_rule` returns, the rule definition is
+converted into a plain rule where all the values that have non string types
+have been converted to the relevant type.
+
+A rule is composed of flat items and contextual items.
+Flat items do not depend on other rules, contextual rules do and are defined
+with condition expressions.
+A condition expression is an expression that has a truth value and depends on
+other rules in the graph of rules.
+Other rules are referred to by their names within curly braces {}.
 """
 
 import re
@@ -14,9 +24,9 @@ from .exceptions import RuleError, ParserSyntaxError
 
 
 # pattern to identify a condition expression
-ITEM_PARSER = re.compile(r'(?:{(.+?)})')
+RULE_NAME_PARSER = re.compile(r'(?:{(.+?)})')
 
-# rules for checking rule items
+# rules for checking a rule definition
 RULE_META_RULE = {
     'exists': {
         'exists': True,
@@ -39,48 +49,55 @@ RULE_META_RULE = {
     },
 }
 
+# for parsing values ranges
 RANGE_PARSER = RangeParser()
 
 
-def parse_rule(rule):
-    """Parse a raw rule.
+def parse_rule(rule_def):
+    """Parse a rule definition.
 
     Parameters
     ----------
     rule : dict
-        rule to parse
+        rule definition to parse
 
     Returns
     -------
     dict
         parsed rule
     list of str
-        keys of the dependencies
+        names of the rules the current rule depends on
     """
-    parsed_rule = dict()
+    rule = dict()
 
-    items, ctx_rules = _split_sub_sections(rule)
+    # split apart the contextual items and the flat items
+    flat_items_def, ctx_items_def = _split_flat_and_contextual_items(rule_def)
 
-    # parse the common rule items
-    parsed_items = _parse_rule_items(items)
-    parsed_rule.update(parsed_items)
+    # parse the flat items first as the contextual items are based on them
+    flat_items = _parse_flat_items(flat_items_def)
+    rule.update(flat_items)
 
-    # parse contextual rules
+    # parse the contextual items, their are composed of sub-rules that override
+    # the root flat items, also discover the dependencies
     deps = list()
-    for cond_exp, ctx_rule in ctx_rules.items():
+    for cond_exp, ctx_rule in ctx_items_def.items():
         deps += _parse_dependencies(cond_exp)
 
-        # complete the context rule with inherited common rule
-        completed_ctx_rule = dict(parsed_items)
+        # start off the contextual rule with the root flat items as a
+        # contextual rule may only define the items that override the flat items
+        completed_ctx_rule = dict(flat_items)
         completed_ctx_rule.update(ctx_rule)
 
-        parsed_ctx_rule = _parse_rule_items(completed_ctx_rule)
-        parsed_rule[cond_exp] = parsed_ctx_rule
-    return parsed_rule, deps
+        parsed_ctx_rule = _parse_flat_items(completed_ctx_rule)
+        rule[cond_exp] = parsed_ctx_rule
+
+    return rule, deps
 
 
-def _split_sub_sections(dict_):
-    """Split simple items and sub-sections of a dictionary.
+def _split_flat_and_contextual_items(rule_def):
+    """Split flat and contextual items of a rule.
+
+    It returns to split simple items and sub-sections of a dictionary.
 
     Parameters
     ----------
@@ -90,13 +107,13 @@ def _split_sub_sections(dict_):
     Returns
     -------
     dict
-        rule part with the common items
+        flat items
     dict of dict
-        rule part with the contextual rules
+        contextual items
     """
     items = dict()
     sub_sections = dict()
-    for key, value in dict_.items():
+    for key, value in rule_def.items():
         if isinstance(value, dict):
             sub_sections[key] = value
         else:
@@ -104,12 +121,12 @@ def _split_sub_sections(dict_):
     return items, sub_sections
 
 
-def _parse_rule_items(rule):
-    """Parse the non-conditional items of a rule.
+def _parse_flat_items(rule_items):
+    """Parse the flat items of a rule definition.
 
     Parameters
     ----------
-    rule : dict
+    rule_def : dict
         rule items to parse
 
     Returns
@@ -120,32 +137,32 @@ def _parse_rule_items(rule):
     Raises
     ------
     RuleError
-        if items are not keys of RULE_META_RULE
+        if items have illegal keys
     """
-    new_rule = dict()
+    rule = dict()
     for key in ('exists', 'type'):
-        new_rule[key] = check_value(rule.get(key),
-                                    RULE_META_RULE[key]['exists'],
-                                    RULE_META_RULE[key]['type'],
-                                    allowed=RULE_META_RULE[key]['allowed'])
+        rule[key] = check_value(rule_items.get(key),
+                                RULE_META_RULE[key]['exists'],
+                                RULE_META_RULE[key]['type'],
+                                allowed=RULE_META_RULE[key]['allowed'])
 
-    if 'allowed' in rule:
-        new_rule['allowed'] = _parse_allowed(rule['allowed'],
-                                             new_rule['type'])
+    if 'allowed' in rule_items:
+        rule['allowed'] = _parse_allowed(rule_items['allowed'],
+                                         rule['type'])
 
-    if 'default' in rule:
-        new_rule['default'] = check_value(rule['default'],
-                                          True,
-                                          new_rule['type'],
-                                          allowed=new_rule.get('allowed'))
+    if 'default' in rule_items:
+        rule['default'] = check_value(rule_items['default'],
+                                      True,
+                                      rule['type'],
+                                      allowed=rule.get('allowed'))
 
     # check there's no illegal keys
-    if not set(rule).issubset(set(RULE_META_RULE)):
-        keys = set(rule) - set(RULE_META_RULE)
+    if not set(rule_items).issubset(set(RULE_META_RULE)):
+        keys = set(rule_items) - set(RULE_META_RULE)
         msg = 'item with keys "{0}" is not a valid rule item'.format(keys)
         raise RuleError(msg)
 
-    return new_rule
+    return rule
 
 
 def _parse_allowed(allowed, type_):
@@ -201,14 +218,14 @@ def _parse_dependencies(condexp):
     Returns
     -------
     list of keys
-        keys of the dependencies
+        names of the rules the current rule depends on
 
     Raises
     ------
     RuleError
         when there is no dependency found
     """
-    parsed = ITEM_PARSER.findall(condexp)
+    parsed = RULE_NAME_PARSER.findall(condexp)
     if parsed:
         return parsed
     else:

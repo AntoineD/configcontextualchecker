@@ -1,7 +1,8 @@
 import unittest
 
 from configcontextualchecker.rule_parser import parse_rule, \
-    _parse_dependencies, _split_sub_sections, _parse_allowed, _parse_rule_items
+    _parse_dependencies, _split_flat_and_contextual_items, _parse_allowed,\
+    _parse_flat_items
 from configcontextualchecker.range import Range
 from configcontextualchecker.exceptions import ItemError, RuleError
 
@@ -27,7 +28,7 @@ class TestRuleParser(unittest.TestCase):
             'b': dict(),
         }
         expected = ({'a': None}, {'b': dict()})
-        result = _split_sub_sections(rule)
+        result = _split_flat_and_contextual_items(rule)
         self.assertEqual(expected, result)
 
     def test_parse_allowed(self):
@@ -103,7 +104,7 @@ class TestRuleParser(unittest.TestCase):
             'default': 0,
         }
 
-        result = _parse_rule_items(rule)
+        result = _parse_flat_items(rule)
         self.assertEqual(expected, result)
 
         # not allowed default
@@ -114,14 +115,14 @@ class TestRuleParser(unittest.TestCase):
             'default': '1',
         }
         with self.assertRaises(ValueError):
-            _parse_rule_items(rule)
+            _parse_flat_items(rule)
 
         # missing item
         rule = {
             'exists': 'True',
         }
         with self.assertRaises(ItemError):
-            _parse_rule_items(rule)
+            _parse_flat_items(rule)
 
         # illegal item
         rule = {
@@ -130,7 +131,7 @@ class TestRuleParser(unittest.TestCase):
             'foo': 'True',
         }
         with self.assertRaises(RuleError):
-            _parse_rule_items(rule)
+            _parse_flat_items(rule)
 
     def test_parse_rule(self):
         # OK case

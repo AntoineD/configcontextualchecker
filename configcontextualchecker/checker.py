@@ -1,4 +1,7 @@
-"""This module provides the :class:`ConfigContextualChecker` class."""
+"""This module provides the :class:`ConfigContextualChecker` class.
+
+This is the entry point into the checker.
+"""
 
 import networkx
 
@@ -7,8 +10,8 @@ from .rule_parser import parse_rule
 from .rule_applier import apply_rule
 
 
-class GraphNode(object):
-    """Graph node class.
+class RuleNode(object):
+    """Represent a rule node in the rules with its dependent rules.
 
     Attributes
     ----------
@@ -17,7 +20,7 @@ class GraphNode(object):
     rule: dict
         node rule
     dependencies: list of str
-        keys of the dependencies
+        node names the current node depends on
 
     Parameters
     ----------
@@ -26,7 +29,7 @@ class GraphNode(object):
     rule: dict
         node rule
     dependencies: list of str
-        keys of the dependencies
+        node names the current node depends on
     """
 
     def __init__(self, name, rule, dependencies):
@@ -36,15 +39,15 @@ class GraphNode(object):
 
 
 class ConfigContextualChecker(object):
-    """Config checker class.
+    """Contextual config checker class.
 
     A :class:`ConfigContextualChecker` object is a callable that can process a
     config object.
 
     Parameters
     ----------
-    rules_desc : dict
-        rules descriptions
+    rules : dict
+        rule definitions
 
     Attributes
     ----------
@@ -52,20 +55,20 @@ class ConfigContextualChecker(object):
         rules dependency graph
     """
 
-    def __init__(self, rules_desc):
-        # convert the rules descriptions into graph nodes
-        nodes = list()
-        for name, raw_rule in rules_desc.items():
-            rule, deps = parse_rule(raw_rule)
-            nodes += [GraphNode(name, rule, deps)]
+    def __init__(self, rules):
+        # parse the rule definitions and convert them into rule nodes
+        rule_nodes = list()
+        for name, rule_def in rules.items():
+            rule, deps = parse_rule(rule_def)
+            rule_nodes += [RuleNode(name, rule, deps)]
 
-        # create the dependency graph of the rules nodes
+        # create the dependency graph of the rule nodes
         self.graph = networkx.DiGraph()
-        self.graph.add_nodes_from(nodes)
+        self.graph.add_nodes_from(rule_nodes)
         name_node = dict()
-        for node in nodes:
+        for node in rule_nodes:
             name_node[node.name] = node
-        for node in nodes:
+        for node in rule_nodes:
             for dep in node.dependencies:
                 self.graph.add_edge(name_node[dep], node)
 
@@ -77,7 +80,8 @@ class ConfigContextualChecker(object):
         config : dict
             config to check
         """
-        # loop over the rules nodes sorted according their dependencies
+        # loop over the rule nodes sorted according to their dependencies and
+        # apply the rules
         for node in networkx.topological_sort(self.graph):
             value = apply_rule(node.name, node.rule, config)
             if value is not None:
