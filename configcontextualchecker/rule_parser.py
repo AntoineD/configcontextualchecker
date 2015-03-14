@@ -2,7 +2,8 @@
 
 The function :function:`parse_rule` parse and check each items of a raw rule.
 A raw rule is a rule where items value may be string representation of other python types.
-When the function returns, the raw rule is converted into a rule where all the values that have non string types associated have been converted to the relevant type.
+When the function returns, the raw rule is converted into a rule where all the values that have non string types
+associated have been converted to the relevant type.
 """
 
 import re
@@ -114,7 +115,7 @@ def _parse_rule_items(rule):
     Returns
     -------
     dict
-        rule converted to python types when possible.
+        rule converted to python types when possible
 
     Raises
     ------

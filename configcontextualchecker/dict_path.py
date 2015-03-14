@@ -40,7 +40,7 @@ def set_from_path(dict_, path, value):
     """Set a dict value from a path.
 
     Missing sections are created recursively, even if an existing value has to
-    be overwitten.
+    be overwritten.
 
     Parameters
     ----------

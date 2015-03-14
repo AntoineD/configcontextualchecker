@@ -38,7 +38,7 @@ class GraphNode(object):
 class ConfigContextualChecker(object):
     """Config checker class.
 
-    A :class:`ConfigContextualChecker` object is a callable that can check a
+    A :class:`ConfigContextualChecker` object is a callable that can process a
     config object.
 
     Parameters
