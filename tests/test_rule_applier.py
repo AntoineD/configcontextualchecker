@@ -1,6 +1,6 @@
 import unittest
 
-from configcontextualchecker.rule_enforcer import check_value, \
+from configcontextualchecker.rule_applier import check_value, \
     ItemError, _type_string
 
 

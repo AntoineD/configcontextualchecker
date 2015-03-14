@@ -7,7 +7,7 @@ from .dict_path import get_from_path
 CONDEXP_PARSER = condexp_parser.Parser()
 
 
-def enforce_item_rule(item_path, rule, config):
+def apply_rule(item_path, rule, config):
     """Check a config's item against a rule.
 
     Parameters

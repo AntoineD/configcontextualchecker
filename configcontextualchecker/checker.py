@@ -4,7 +4,7 @@ import networkx
 
 from .dict_path import set_from_path
 from .rule_parser import parse_rule
-from .rule_enforcer import enforce_item_rule
+from .rule_applier import apply_rule
 
 
 class GraphNode(object):
@@ -79,6 +79,6 @@ class ConfigContextualChecker(object):
         """
         # loop over the rules nodes sorted according their dependencies
         for node in networkx.topological_sort(self.graph):
-            new_value = enforce_item_rule(node.name, node.rule, config)
-            if new_value is not None:
-                set_from_path(config, node.name, new_value)
+            value = apply_rule(node.name, node.rule, config)
+            if value is not None:
+                set_from_path(config, node.name, value)

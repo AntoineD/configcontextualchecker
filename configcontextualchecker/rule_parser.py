@@ -9,7 +9,7 @@ associated have been converted to the relevant type.
 import re
 
 from .range import RangeParser, Range
-from .rule_enforcer import check_value
+from .rule_applier import check_value
 from .exceptions import RuleError, ParserSyntaxError
 
 
