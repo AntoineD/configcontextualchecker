@@ -59,7 +59,7 @@ class Range(object):
         ValueError
             if the values are equal or lower > upper
         """
-        types_ = set((type(lower_value), type(upper_value)))
+        types_ = {type(lower_value), type(upper_value)}
         try:
             # remove None to simplify further checking
             types_.remove(type(None))
