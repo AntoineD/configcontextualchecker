@@ -40,10 +40,10 @@ class Range(object):
     def type(self):
         """Return the bound type."""
         # bound values are both of the same type or one is None
-        if self.lower._value is not None:
-            return type(self.lower._value)
-        elif self.upper._value is not None:
-            return type(self.upper._value)
+        if self.lower.value is not None:
+            return type(self.lower.value)
+        elif self.upper.value is not None:
+            return type(self.upper.value)
 
     @staticmethod
     def _check_bounds_values(lower_value, upper_value):

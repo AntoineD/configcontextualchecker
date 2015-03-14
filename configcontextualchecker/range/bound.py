@@ -28,7 +28,7 @@ class BoundBase(object):
     UNBOUND = None
 
     def __init__(self, value, is_open):
-        self._value = value
+        self.value = value
         self._open = is_open
 
     @classmethod
@@ -62,11 +62,11 @@ class BoundBase(object):
         bool
             whether the value satisfies the bound or not
         """
-        if self._value is None:
+        if self.value is None:
             # no bound so it's always OK
             return True
         else:
-            return self._OPERATOR[self._open](value, self._value)
+            return self._OPERATOR[self._open](value, self.value)
 
 
 class LowerBound(BoundBase):
@@ -80,7 +80,7 @@ class LowerBound(BoundBase):
     UNBOUND = '-inf'
 
     def __str__(self):
-        v = self._repr_unbound(self._value)
+        v = self._repr_unbound(self.value)
         s = {
             True: ']',
             False: '[',
@@ -99,7 +99,7 @@ class UpperBound(BoundBase):
     UNBOUND = '+inf'
 
     def __str__(self):
-        v = self._repr_unbound(self._value)
+        v = self._repr_unbound(self.value)
         s = {
             True: '[',
             False: ']',
