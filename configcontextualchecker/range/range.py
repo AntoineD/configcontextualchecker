@@ -1,7 +1,5 @@
 """This module defines the value range class :class:`Range`."""
 
-import types
-
 from .bound import LowerBound, UpperBound
 
 

@@ -3,7 +3,6 @@ import sys
 
 from configcontextualchecker.range.range_parser import LowerBound, UpperBound
 from configcontextualchecker.range import Range, RangeParser
-from configcontextualchecker.exceptions import ParserSyntaxError
 
 from .test_condexp_parser import ErrorChecking
 
