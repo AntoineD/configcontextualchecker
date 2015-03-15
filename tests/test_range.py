@@ -4,7 +4,7 @@ import sys
 from configcontextualchecker.range.range_parser import LowerBound, UpperBound
 from configcontextualchecker.range import Range, RangeParser
 
-from .test_condexp_parser import ErrorChecking
+from tests.test_condexp_parser import ErrorChecking
 
 
 class TestRangeParser(unittest.TestCase, ErrorChecking):

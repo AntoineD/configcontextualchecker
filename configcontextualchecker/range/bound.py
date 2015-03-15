@@ -1,4 +1,6 @@
-"""This module defines the range bounds classes :class:`LowerBound` and :class:`UpperBound`."""
+"""This module defines the range bounds classes :class:`LowerBound`
+and :class:`UpperBound`.
+"""
 
 import operator
 

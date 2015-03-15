@@ -1,4 +1,6 @@
-"""This module defines the functions to get and set a dictionary value from a path."""
+"""This module defines the functions to get and set a dictionary value
+from a path.
+"""
 
 PATH_SEP = '/'
 
