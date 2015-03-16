@@ -56,7 +56,7 @@ class TestRuleParser(unittest.TestCase):
 
         rule = Rule('', rule_def)
 
-        self.assertEqual(['{foo}'], rule.ctx_rules.keys())
+        self.assertEqual(['{foo}'], list(rule.ctx_rules.keys()))
         self.assertRuleEqual(expected_rule, rule.base_rule)
         self.assertRuleEqual(expected_rule['{foo}'], rule.ctx_rules['{foo}'])
 
