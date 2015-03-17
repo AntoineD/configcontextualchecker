@@ -1,4 +1,4 @@
-"""This module provides a parser for conditional expressions."""
+"""This module provides a parser."""
 
 from ply import lex, yacc
 
@@ -6,7 +6,16 @@ from .exceptions import ParserSyntaxError
 
 
 class ParserBase(object):
-    """This class provides a conditional expression parser."""
+    """This class provides a basic parser.
+
+    It can parse:
+    * a comma,
+    * a float,
+    * an integer,
+    * ignored characters
+
+    It also defines the parse method.
+    """
 
     debug = False
 

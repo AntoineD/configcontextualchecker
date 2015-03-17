@@ -1,11 +1,13 @@
-"""This module provides a parser for the rule definitions.
+"""This module provides the rule class.
 
-A rule is composed of flat items and contextual items.
-Flat items do not depend on other rules, contextual rules do and are defined
-with condition expressions.
-A condition expression is an expression that has a truth value and depends on
-other rules in the graph of rules.
-Other rules are referred to by their names within curly braces {}.
+A rule has a name, it is composed of a base :class:`FlatRule` and of contextual
+rules.
+The name is the path of the item that shall satisfy the rule.
+A contextual rule is a :class:`FlatRule` bound to a conditional expression.
+A conditional expression is an expression that has a truth value which may
+depend on zero or more of the items in the config object to be checked.
+In a conditional expression, the items of the config object are referred to by
+their path within curly braces {}.
 """
 
 import re

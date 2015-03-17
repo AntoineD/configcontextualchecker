@@ -2,7 +2,7 @@ import unittest
 
 from configcontextualchecker.rule import FlatRule
 from configcontextualchecker.range import Range
-from configcontextualchecker.exceptions import ItemError
+from configcontextualchecker.exceptions import ItemError, RuleError
 
 
 class TestRuleParser(unittest.TestCase):
@@ -106,15 +106,14 @@ class TestRuleParser(unittest.TestCase):
         with self.assertRaises(ItemError):
             FlatRule(rule)
 
-        # TODO: re-implement this?
         # illegal item
-        # rule = {
-        #     'exists': True,
-        #     'type': int,
-        #     'foo': 'True',
-        # }
-        # with self.assertRaises(RuleError):
-        #     FlatRule(rule)
+        rule = {
+            'exists': True,
+            'type': int,
+            'foo': 'True',
+        }
+        with self.assertRaises(RuleError):
+            FlatRule(rule)
 
     def test_exists(self):
         result = FlatRule._check_value(0, True, int)

@@ -2,7 +2,7 @@
 """
 
 from .range import RangeParser, Range
-from .exceptions import ParserSyntaxError, ItemError
+from .exceptions import RuleError, ItemError, ParserSyntaxError
 from .dict_path import get_from_path
 
 
@@ -107,6 +107,13 @@ class FlatRule(object):
                                  self.default)
 
     def _parse(self, rule_def):
+        # check possible items
+        for key, value in rule_def.items():
+            if isinstance(value, dict):
+                continue
+            if key not in self.RULE_META_RULE.keys():
+                raise RuleError('illegal key {0}'.format(key))
+
         meta_rule = self.RULE_META_RULE['type']
         self.type = self._check_value(rule_def.get('type'),
                                       meta_rule['exists'],
